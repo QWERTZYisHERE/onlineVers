@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Pixelify+Sans:wght@400..700&display=swap"
+    rel="stylesheet">
+  <meta charset="UTF-8">
+  <script>(function () { var t = localStorage.getItem('theme'); if (t) document.documentElement.setAttribute('data-theme', t); })();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Lektion 5</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: "Manrope", sans-serif;
+      font-weight: bold;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      max-width: 393px;
+      margin: 0 auto;
+      width: 100%;
+      height: 100dvh;
+      color: var(--text);
+      position: relative;
+    }
+
+    /* ── Top bar: info + close ── */
+    .lesson-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 30px 24px 0;
+      flex-shrink: 0;
+    }
+
+    .info-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--accent-light);
+      border: solid var(--border-nav);
+      border-width: 4px;
+      color: #fff;
+      font-family: Georgia, "Times New Roman", serif;
+      font-style: italic;
+      font-size: 24px;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+      filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.12));
+    }
+
+    .info-btn:active {
+      filter: brightness(0.9);
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+      width: 35px;
+      height: 35px;
+    }
+
+    /* ── Morphing word ── */
+    .lesson-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .morph-word {
+      display: inline-block;
+      font-size: 64px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.1;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+      transition: transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+
+    /* Nudge the word down while the theory bubble is open */
+    .morph-word.nudged {
+      transform: translateY(0px);
+    }
+
+    /* The two spellings overlay in one grid cell, the slot width animates. */
+    .mw-morph {
+      display: inline-grid;
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+      vertical-align: baseline;
+      transition: width 0.55s ease;
+    }
+
+    .mw-morph .mw {
+      grid-area: 1 / 1;
+      color: var(--text);
+      transition: opacity 0.55s ease, filter 0.55s ease, transform 0.55s ease;
+      will-change: opacity, filter, transform;
+    }
+
+    /* The changed initial consonant (T → D) */
+    .mw .c {
+      color: var(--soft-cons);
+    }
+
+    /* Default: Hochdeutsch sharp, dialect blurred away */
+    .mw-hoch {
+      opacity: 1;
+      filter: blur(0);
+      transform: scale(1);
+    }
+
+    .mw-dialekt {
+      opacity: 0;
+      filter: blur(9px);
+      transform: scale(1.18);
+    }
+
+    /* Morphed: blur-dissolve into the dialect spelling */
+    .morph-word.dialekt .mw-hoch {
+      opacity: 0;
+      filter: blur(9px);
+      transform: scale(0.82);
+    }
+
+    .morph-word.dialekt .mw-dialekt {
+      opacity: 1;
+      filter: blur(0);
+      transform: scale(1);
+    }
+
+    /* ── Bottom navigation ── */
+    .lesson-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 24px 40px;
+      flex-shrink: 0;
+    }
+
+    .nav-btn-pill {
+      background: var(--accent-light);
+      border: solid var(--border-nav);
+      border-width: 4px;
+      border-radius: 40px;
+      color: #fff;
+      font-family: "Manrope", sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      padding: 14px 36px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.12));
+    }
+
+    .nav-btn-pill:active {
+      filter: brightness(0.9);
+    }
+
+    /* ── Theory bubble (styled to match bubble.svg) ── */
+      .info-bubble {
+      position: absolute;
+      top: 110px;
+      left: 16px;
+      right: 16px;
+      background: var(--accent-light);
+      color: #fff;
+      border: 4px solid var(--border-nav);
+      border-radius: 6px;
+      padding: 20px 16px;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.4;
+      z-index: 20;
+      transform: scale(0);
+      transform-origin: 32px -18px;
+      transition: transform 0.22s ease-in;
+      filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.12));
+      font-size: calc(20px * var(--font-scale));
+    }
+
+    .info-bubble.visible {
+      transform: scale(1);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .info-bubble::before {
+      content: '';
+      position: absolute;
+      top: -25px;
+      left: 24px;
+      width: 0;
+      height: 0;
+      border-right: 28px solid transparent;
+      border-bottom: 26px solid var(--border-nav);
+    }
+
+    /* … and the accent-light fill layer on top */
+    .info-bubble::after {
+      content: '';
+      position: absolute;
+      top: -18px;
+      left: 27px;
+      width: 0;
+      height: 0;
+      border-right: 23px solid transparent;
+      border-bottom: 21px solid var(--accent-light);
+    }
+
+    .info-bubble .hl {
+      color: var(--light);
+      font-weight: 800;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="lesson-top">
+    <button class="info-btn" id="infoBtn" onclick="toggleInfo(event)">i</button>
+    <button class="close-btn" onclick="navigateTo('index.html')" aria-label="Schliessen">
+      <svg viewBox="0 0 41 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3.5 37.5L20.2119 20.5M37.5 3.5L20.2119 20.5M20.2119 20.5L3.5 3.5M20.2119 20.5L37.5 37.5" stroke="#A29595" stroke-width="7"
+          stroke-linecap="round" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Theory bubble (toggled by the info button) -->
+  <div class="info-bubble" id="infoBubble">
+    Ursprünglich starke Verschlusslaute im Anlaut betonter Silben sind im Gegensatz zum Schriftdeutschen
+    <span class="hl">schwach.</span>
+  </div>
+
+  <div class="lesson-body">
+    <div class="morph-word" id="morphWord" onclick="toggleWord()"><span class="mw-morph"><span
+          class="mw mw-hoch"><span class="c">T</span>a</span><span class="mw mw-dialekt"><span
+            class="c">D</span>aa</span></span>g</div>
+  </div>
+
+  <div class="lesson-nav">
+    <button class="nav-btn-pill" onclick="navigateTo('lektion4.html')">Zurück</button>
+    <button class="nav-btn-pill" onclick="navigateTo('lektion6.html')">Weiter</button>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    let showingDialekt = false;
+    const morphWord = document.getElementById('morphWord');
+    const mwMorph = document.querySelector('.mw-morph');
+    const mwHoch = document.querySelector('.mw-hoch');
+    const mwDialekt = document.querySelector('.mw-dialekt');
+    let wHoch = 0, wDialekt = 0;
+
+    // Measure each spelling's natural width so the slot can animate between them.
+    function measure() {
+      wHoch = mwHoch.offsetWidth;
+      wDialekt = mwDialekt.offsetWidth;
+      mwMorph.style.width = (showingDialekt ? wDialekt : wHoch) + 'px';
+    }
+
+    function setWord(toDialekt) {
+      showingDialekt = toDialekt;
+      morphWord.classList.toggle('dialekt', toDialekt);
+      mwMorph.style.width = (toDialekt ? wDialekt : wHoch) + 'px';
+    }
+
+    function toggleWord() {
+      setWord(!showingDialekt);
+    }
+
+    measure();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(measure);
+    }
+
+    function syncNudge() {
+      const bubble = document.getElementById('infoBubble');
+      if (!bubble.classList.contains('visible')) {
+        morphWord.style.transform = '';
+        return;
+      }
+      // Keep at least 50px between the bubble's bottom and the word (offset*
+      // values are transform-independent, so the scale animation doesn't skew them)
+      const bubbleBottom = bubble.offsetTop + bubble.offsetHeight;
+      const gap = morphWord.offsetTop - bubbleBottom;
+      const nudge = gap < 50 ? (50 - gap) : 0;
+      morphWord.style.transform = nudge > 0 ? 'translateY(' + nudge + 'px)' : '';
+    }
+
+    function toggleInfo(e) {
+      e.stopPropagation();
+      document.getElementById('infoBubble').classList.toggle('visible');
+      syncNudge();
+    }
+
+    document.addEventListener('click', function () {
+      document.getElementById('infoBubble').classList.remove('visible');
+      syncNudge();
+    });
+
+    // Auto-morph from Hochdeutsch to Baseldeutsch after a 3-second pause
+    setTimeout(function () { setWord(true); }, 1500);
+  </script>
+
+</body>
+
+</html>

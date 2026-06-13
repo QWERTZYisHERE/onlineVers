@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Pixelify+Sans:wght@400..700&display=swap"
+    rel="stylesheet">
+  <meta charset="UTF-8">
+  <script>(function () { var t = localStorage.getItem('theme'); if (t) document.documentElement.setAttribute('data-theme', t); })();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Lektion 6</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: "Manrope", sans-serif;
+      font-weight: bold;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      max-width: 393px;
+      margin: 0 auto;
+      width: 100%;
+      height: 100dvh;
+      color: var(--text);
+      position: relative;
+    }
+
+    /* ── Top bar: info + close ── */
+    .lesson-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 30px 24px 0;
+      flex-shrink: 0;
+    }
+
+    .info-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--accent-light);
+      border: solid var(--border-nav);
+      border-width: 4px;
+      color: #fff;
+      font-family: Georgia, "Times New Roman", serif;
+      font-style: italic;
+      font-size: 24px;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+      filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.12));
+    }
+
+    .info-btn:active {
+      filter: brightness(0.9);
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+      width: 35px;
+      height: 35px;
+    }
+
+    /* ── Body ── */
+    .lesson-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 24px;
+    }
+
+    .fasnacht-img {
+      width: 86%;
+      max-width: 300px;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .word {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.15;
+      text-align: center;
+      max-width: 320px;
+      user-select: none;
+    }
+
+    /* ── Mic ── */
+    .mic-btn {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .mic-btn svg {
+      width: 110px;
+      height: auto;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        filter: drop-shadow(0 0 0px rgba(69, 173, 79, 0.5));
+      }
+
+      50% {
+        filter: drop-shadow(0 0 12px rgba(69, 173, 79, 0.85));
+      }
+    }
+
+    .mic-btn.listening svg {
+      animation: pulse 1s infinite;
+    }
+
+    .feedback {
+      height: 24px;
+      font-size: calc(18px * var(--font-scale));
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .feedback.correct {
+      color: var(--result-correct);
+    }
+
+    .feedback.wrong {
+      color: var(--result-wrong);
+    }
+
+    /* ── Typed-answer fallback (no speech support) ── */
+    .type-controls {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .type-form {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 290px;
+    }
+
+    .type-input {
+      flex: 1;
+      min-width: 0;
+      font-family: "Manrope", sans-serif;
+      font-size: calc(18px * var(--font-scale));
+      font-weight: 700;
+      color: var(--text);
+      background: var(--bg-card);
+      border: solid var(--border);
+      border-width: 2px 2px 5px 2px;
+      border-radius: 30px;
+      padding: 13px 20px;
+      outline: none;
+    }
+
+    .type-input::placeholder {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .check-btn {
+      flex-shrink: 0;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: solid var(--light);
+      border-width: 2px 2px 5px 2px;
+      background: var(--accent-light);
+      color: #fff;
+      font-size: 26px;
+      font-weight: 800;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Theory bubble (styled to match bubble.svg) ── */
+       .info-bubble {
+      position: absolute;
+      top: 110px;
+      left: 16px;
+      right: 16px;
+      background: var(--accent-light);
+      color: #fff;
+      border: 4px solid var(--border-nav);
+      border-radius: 6px;
+      padding: 20px 16px;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.4;
+      z-index: 20;
+      transform: scale(0);
+      transform-origin: 32px -18px;
+      transition: transform 0.22s ease-in;
+      filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.12));
+      font-size: calc(20px * var(--font-scale));
+    }
+
+    .info-bubble.visible {
+      transform: scale(1);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .info-bubble::before {
+      content: '';
+      position: absolute;
+      top: -25px;
+      left: 24px;
+      width: 0;
+      height: 0;
+      border-right: 28px solid transparent;
+      border-bottom: 26px solid var(--border-nav);
+    }
+
+    .info-bubble::after {
+      content: '';
+      position: absolute;
+      top: -18px;
+      left: 27px;
+      width: 0;
+      height: 0;
+      border-right: 23px solid transparent;
+      border-bottom: 21px solid var(--accent-light);
+    }
+
+    .info-bubble .hl {
+      color: var(--light);
+      font-weight: 800;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="lesson-top">
+    <button class="info-btn" id="infoBtn" onclick="toggleInfo(event)">i</button>
+    <button class="close-btn" onclick="navigateTo('index.html')" aria-label="Schliessen">
+      <svg viewBox="0 0 41 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3.5 37.5L20.2119 20.5M37.5 3.5L20.2119 20.5M20.2119 20.5L3.5 3.5M20.2119 20.5L37.5 37.5" stroke="#A29595" stroke-width="7"
+          stroke-linecap="round" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Theory bubble (toggled by the info button) -->
+  <div class="info-bubble" id="infoBubble">
+    Die «drei schönsten Tage» sind die Basler <span class="hl">Fasnacht</span> – das grösste Fest der Stadt,
+    das alle gelernten Lautgesetze vereint.
+  </div>
+
+  <div class="lesson-body">
+    <img class="fasnacht-img" src="fasnacht.jpg" alt="Basler Fasnacht">
+
+    <div class="word">drey sch<span style="color: var(--vowel)">ee</span>nste <span
+        style="color: var(--soft-cons)">D</span><span style="color: var(--vowel)">ää</span><span
+        style="color: var(--vowel-alt)">g</span>e</div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <button class="voice-btn" id="micBtn" onclick="startVoice()" aria-label="Sprechen"></button>
+
+    <!-- Fallback for devices without speech recognition (e.g. iOS Safari) -->
+    <div class="type-controls" id="typeControls">
+      <form class="type-form" id="typeForm" onsubmit="submitTyped(event)">
+        <input class="type-input" id="typeInput" type="text" inputmode="text" autocomplete="off" autocapitalize="off"
+          autocorrect="off" spellcheck="false" placeholder="Satz sprechen / tippen…">
+        <button type="submit" class="check-btn" aria-label="Prüfen">✓</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    // Accepted spellings of the Baseldeutsch phrase "drey scheenste Däage"
+    const targets = [
+      'drey scheenste däage',
+      'die drey scheenste däage',
+      'drei scheenste däage',
+      'drü scheenschti dääg'
+    ];
+    let isListening = false;
+    let recognition = null;
+
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognitionAPI) {
+      recognition = new SpeechRecognitionAPI();
+      recognition.lang = 'de-DE';   // standard German recognises the dialect sounds, e.g. "drei scheenste dääge"
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onresult = function (e) {
+        const spoken = e.results[0][0].transcript.trim();
+        setListening(false);
+        checkAnswer(spoken);
+      };
+      recognition.onerror = function () { setListening(false); };
+      recognition.onend = function () { setListening(false); };
+    } else {
+      // No speech recognition (e.g. iOS Safari) → typed fallback
+      document.getElementById('micBtn').style.display = 'none';
+      document.getElementById('typeControls').style.display = 'flex';
+    }
+
+    function setListening(val) {
+      isListening = val;
+      const btn = document.getElementById('micBtn');
+      if (val) startVoiceViz(btn);
+      else stopVoiceViz(btn);
+    }
+
+    buildVoiceBars(document.getElementById('micBtn'));
+
+    function startVoice() {
+      const fb = document.getElementById('feedback');
+      // Android/desktop Chrome only allow the mic on a secure (HTTPS) origin
+      if (!window.isSecureContext) {
+        fb.textContent = 'Mikrofon bruucht HTTPS – App über https:// öffne';
+        fb.className = 'feedback wrong';
+        return;
+      }
+      if (!recognition) {
+        fb.textContent = 'Dä Browser cha kei Spraach erkenne – nimm Chrome';
+        fb.className = 'feedback wrong';
+        return;
+      }
+      if (isListening) { recognition.stop(); return; }
+      
+      fb.className = 'feedback';
+      setListening(true);
+      try {
+        recognition.start();
+      } catch (e) {
+        setListening(false);
+        fb.textContent = 'Het nid gstartet – nomol versueche';
+        fb.className = 'feedback wrong';
+      }
+    }
+
+    function submitTyped(e) {
+      e.preventDefault();
+      const input = document.getElementById('typeInput');
+      const val = input.value.trim();
+      if (!val) return;
+      checkAnswer(val);
+    }
+
+    function normalize(str) {
+      return str.toLowerCase()
+        .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue')
+        .replace(/[^a-z]/g, '');
+    }
+
+    function levenshtein(a, b) {
+      const m = a.length, n = b.length;
+      if (!m) return n;
+      if (!n) return m;
+      const dp = Array.from({ length: m + 1 }, function (_, i) { return [i]; });
+      for (let j = 0; j <= n; j++) dp[0][j] = j;
+      for (let i = 1; i <= m; i++)
+        for (let j = 1; j <= n; j++)
+          dp[i][j] = a[i - 1] === b[j - 1]
+            ? dp[i - 1][j - 1]
+            : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      return dp[m][n];
+    }
+
+    const targetsNorm = targets.map(normalize);
+
+    function checkAnswer(spoken) {
+      const ns = normalize(spoken);
+      // Lenient match: phrases are long, so allow up to ~40% edit distance
+      const ok = ns.length > 0 && targetsNorm.some(function (t) {
+        return levenshtein(ns, t) <= Math.ceil(t.length * 0.4);
+      });
+      const fb = document.getElementById('feedback');
+      if (ok) {
+        fb.textContent = 'Richtig! 🎉';
+        fb.className = 'feedback correct';
+        setTimeout(function () { navigateTo('fertig.html'); }, 1400);
+      } else {
+        fb.textContent = 'Versuich\'s nomol';
+        fb.className = 'feedback wrong';
+      }
+    }
+
+    function toggleInfo(e) {
+      e.stopPropagation();
+      document.getElementById('infoBubble').classList.toggle('visible');
+    }
+
+    document.addEventListener('click', function () {
+      document.getElementById('infoBubble').classList.remove('visible');
+    });
+  </script>
+
+</body>
+
+</html>

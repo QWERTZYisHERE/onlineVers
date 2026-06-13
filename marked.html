@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Pixelify+Sans:wght@400..700&display=swap"
+    rel="stylesheet">
+  <meta charset="UTF-8">
+  <script>(function () { var t = localStorage.getItem('theme'); if (t) document.documentElement.setAttribute('data-theme', t); })();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Gespeichert</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: "Manrope", sans-serif;
+      font-weight: bold;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      max-width: 393px;
+      margin: 0 auto;
+      width: 100%;
+      height: 100dvh;
+      color: var(--text);
+      font-size: 24px;
+      font-style: normal;
+      line-height: normal;
+    }
+
+    .top-bar {
+      background: var(--bg);
+      height: 30px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    /* ── View system ── */
+    .view {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .view.active {
+      display: flex;
+    }
+
+    /* ── List view ── */
+    .uben-container {
+      padding: 14px 20px 0px;
+      background: transparent;
+      flex-shrink: 0;
+    }
+
+    .uben-btn {
+      display: flex;
+      align-items: center;
+      background: var(--accent-light);
+      border: solid var(--border-nav);
+      border-width: 5px;
+      padding: 12px 250px 12px 12px;
+      gap: 12px;
+      border-radius: 30px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      filter: drop-shadow(0 4px 4px rgba(34, 132, 193, 0.25));
+    }
+
+    .uben-btn:active {
+      filter: brightness(0.85);
+    }
+
+    /* Disabled state — no words to exercise with */
+    .uben-btn.disabled {
+      background: #7F7F7F;
+      border-color: #474747;
+      cursor: default;
+      filter: none;
+    }
+
+    .uben-btn.disabled:active {
+      filter: none;
+    }
+
+    .uben-label {
+      font-family: "Manrope", sans-serif;
+      font-size: calc(18px * var(--font-scale));
+      font-weight: 800;
+      color: var(--border-nav);
+    }
+
+    .uben-btn.disabled .uben-label {
+      color: #CFCFCF;
+    }
+
+    .uben-btn>svg {
+      width: 20px;
+      height: 20px;
+      margin-left: 5px;
+      fill: #FFE7DF;
+      flex-shrink: 0;
+    }
+
+    .uben-btn.disabled>svg path {
+      fill: #CFCFCF;
+      stroke: #CFCFCF;
+    }
+
+    .word-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .word-entry {
+      background: var(--bg-card);
+      border: 4px solid var(--border);
+      padding: 10px 7px 10px 14px;
+      color: var(--text);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+    }
+
+    .word-labels {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .word-labels .entry-german {
+      font-size: calc(18px * var(--font-scale));
+      font-weight: 700;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .word-labels .entry-dialect {
+      font-size: calc(18px * var(--font-scale));
+      font-weight: 700;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .remove-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .remove-btn svg {
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+    }
+
+    .no-results {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 48px 20px;
+      font-size: calc(16px * var(--font-scale));
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      padding: 10px 20px 0;
+      flex-shrink: 0;
+    }
+
+    .filter-btn {
+      border-width: 4px;
+      border-style: solid;
+      border-color: var(--border-nav);
+      background: transparent;
+      color: var(--text);
+      font-family: "Manrope", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 25px;
+      cursor: pointer;
+      border-radius: 20px;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.12));
+    }
+
+    .filter-btn.active {
+      background: var(--accent-light);
+      border-color: var(--light);
+      color: #fff;
+
+    }
+
+    /* ── Exercise view ── */
+    .card-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-top: 30%;
+    }
+
+    .exercise-card,
+    .card-shadow {
+      position: absolute;
+      width: 282px;
+      height: 282px;
+      background: var(--bg-card);
+      border: 5px solid var(--border);
+      border-radius: 40px;
+    }
+
+    .card-shadow-2 {
+      transform: translateY(-34px) scale(0.88);
+      z-index: 1;
+    }
+
+    .card-shadow-1 {
+      transform: translateY(-17px) scale(0.94);
+      z-index: 2;
+    }
+
+    .card-area {
+      perspective: 1200px;
+    }
+
+    .exercise-card {
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+    }
+
+    .exercise-card.slide-out {
+      animation: cardSlideOut 0.55s ease-in forwards;
+    }
+
+    @keyframes cardSlideOut {
+      0% {
+        transform: translate(0, 0) rotate(0);
+        opacity: 1;
+      }
+
+      22% {
+        transform: translateY(-22px) scale(1.04);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateX(var(--dir)) rotate(var(--rot));
+        opacity: 0;
+      }
+    }
+
+    .card-word {
+      font-size: 38px;
+      font-weight: 800;
+      color: var(--text);
+      text-align: center;
+      padding: 0 24px;
+    }
+
+    .spoken-feedback {
+      height: 22px;
+      font-size: calc(14px * var(--font-scale));
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 0 30px;
+      flex-shrink: 0;
+    }
+
+    /* Centre the feedback + progress in the gap between cards and buttons */
+    .progress-zone {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .progress-text {
+      font-size: calc(14px * var(--font-scale));
+      font-weight: 500;
+      color: var(--text);
+      text-align: center;
+      padding: 0 30px;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: space-around;
+      padding: 0 40px 60px;
+      flex-shrink: 0;
+    }
+
+    /* ── Typed-answer fallback (no speech support) ── */
+    .type-controls {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 0 30px 60px;
+      flex-shrink: 0;
+    }
+
+    .type-form {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .type-input {
+      flex: 1;
+      min-width: 0;
+      font-family: "Manrope", sans-serif;
+      font-size: calc(18px * var(--font-scale));
+      font-weight: 700;
+      color: var(--text);
+      background: var(--bg-card);
+      border: solid var(--border);
+      border-width: 2px 2px 5px 2px;
+      border-radius: 30px;
+      padding: 13px 20px;
+      outline: none;
+    }
+
+    .type-input::placeholder {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .check-btn {
+      flex-shrink: 0;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: solid var(--light);
+      border-width: 2px 2px 5px 2px;
+      background: var(--accent-light);
+      color: #fff;
+      font-size: 26px;
+      font-weight: 800;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .check-btn:active {
+      filter: brightness(0.9);
+    }
+
+    .skip-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: "Manrope", sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Results view ── */
+    .results-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 40px 40px;
+    }
+
+    .results-title-wrap {
+      position: relative;
+      align-self: flex-start;
+      margin-bottom: 28px;
+    }
+
+    .results-title {
+      font-size: 50px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.1;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 0;
+      letter-spacing: -0.01em;
+      max-width: 300px;
+    }
+
+    .sparkle {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(0);
+      animation: sparkle-twinkle 1.6s ease-in-out infinite;
+    }
+
+    .sparkle svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .sparkle svg path {
+      fill: var(--light);
+      stroke: var(--border-nav);
+      stroke-width: 1.5;
+      stroke-linejoin: round;
+    }
+
+    @keyframes sparkle-twinkle {
+
+      0%,
+      100% {
+        opacity: 0;
+        transform: scale(0);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .results-title .letter {
+      display: inline-block;
+      animation: wave 0.6s ease-in-out;
+    }
+
+    @keyframes wave {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-15px);
+      }
+    }
+
+    .results-score {
+      font-size: calc(26px * var(--font-scale));
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .result-correct {
+      color: var(--result-correct);
+    }
+
+    .result-wrong {
+      color: var(--result-wrong);
+    }
+
+    .results-back {
+      background: none;
+      border: none;
+      font-size: 50px;
+      font-weight: 400;
+      color: var(--text);
+      margin-top: 32px;
+      cursor: pointer;
+      text-align: left;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Bottom nav ── */
+    .bottom-nav {
+      background: var(--bg);
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      flex-shrink: 0;
+      position: sticky;
+      bottom: 0;
+      border-top: 4px solid var(--border);
+      z-index: 100;
+    }
+
+    .nav-btn {
+      width: 52px;
+      height: 52px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="top-bar"></div>
+
+  <!-- View 1: Saved word list -->
+  <div class="view active" id="listView">
+    <div class="uben-container">
+      <button class="uben-btn" id="ubenBtn" onclick="startUeben()">
+        <svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M1.5 14.1637V3.49706C1.5 2.6175 1.5 2.17722 1.68509 1.91698C1.84664 1.68985 2.09564 1.54072 2.37207 1.50507C2.68868 1.46423 3.07701 1.67133 3.85254 2.08495L13.8525 7.41829L13.8562 7.4199C14.7132 7.87699 15.142 8.10565 15.2826 8.41041C15.4053 8.67627 15.4053 8.98316 15.2826 9.24901C15.1418 9.5542 14.712 9.78379 13.8525 10.2422L3.85254 15.5755C3.07645 15.9894 2.6888 16.1957 2.37207 16.1549C2.09564 16.1192 1.84664 15.9701 1.68509 15.743C1.5 15.4828 1.5 15.0433 1.5 14.1637Z"
+            fill="#F77B4F" stroke="#303348" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="uben-label">Üben</span>
+      </button>
+    </div>
+    <div class="word-list" id="wordList"></div>
+    <div class="hint-box" id="hintList">Hier werden die Wörter geübt, die du gesammelt hast!<button class="hint-close"
+        aria-label="Schliessen"></button></div>
+  </div>
+
+  <!-- View 2: Card exercise -->
+  <div class="view" id="exerciseView">
+    <div class="hint-box hint-top" id="hintExercise">Psst! Drücke auf die Karte für Hinweis!<button class="hint-close"
+        aria-label="Schliessen"></button></div>
+    <div class="card-area">
+      <div class="card-shadow card-shadow-2" id="cardShadow2"></div>
+      <div class="card-shadow card-shadow-1" id="cardShadow1"></div>
+      <div class="exercise-card" id="exerciseCard" onclick="peekDialect()">
+        <span class="card-word" id="cardWord"></span>
+      </div>
+    </div>
+    <div class="progress-zone">
+      <div class="spoken-feedback" id="spokenFeedback"></div>
+      <div class="progress-text" id="progressText"></div>
+    </div>
+    <div class="action-buttons" id="voiceControls">
+      <button class="voice-btn" id="micBtn" onclick="startVoice()" aria-label="Sprechen"></button>
+      <button class="wrong-btn" onclick="handleWrong()" aria-label="Falsch"></button>
+    </div>
+
+    <!-- Fallback for devices without speech recognition (e.g. iOS Safari) -->
+    <div class="type-controls" id="typeControls">
+      <form class="type-form" id="typeForm" onsubmit="submitTyped(event)">
+        <input class="type-input" id="typeInput" type="text" inputmode="text" autocomplete="off" autocapitalize="off"
+          autocorrect="off" spellcheck="false" placeholder="Auf Baseldeutsch…">
+        <button type="submit" class="check-btn" aria-label="Prüfen">✓</button>
+      </form>
+      <button type="button" class="skip-btn" onclick="handleWrong()">Weiss ich nicht</button>
+    </div>
+  </div>
+
+  <!-- View 3: Results -->
+  <div class="view" id="resultsView">
+    <div class="results-content">
+      <div class="results-title-wrap" id="resultsTitleWrap">
+        <div class="results-title" id="resultsTitle"></div>
+      </div>
+      <div class="results-score">Richtig: <span class="result-correct" id="resultCorrect">0</span></div>
+      <div class="results-score">Falsch: <span class="result-wrong" id="resultWrong">0</span></div>
+      <button class="spec-btn" onclick="backToList()"> Weiter</button>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn" onclick="navigateTo('index.html')" aria-label="Home"><svg class="nav-icon"
+        viewBox="0 0 31 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g filter="url(#filter0_d_716_228)">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M14.3101 29.4547C11.7604 27.4622 6 17.2513 6 10.9669C6 8.58868 7.0009 6.30826 8.7825 4.62658C10.5641 2.9449 12.9806 2 15.5002 2C18.0197 2 20.4359 2.94476 22.2176 4.62644C23.9992 6.30812 25 8.58925 25 10.9675C25 17.2519 19.2399 27.4624 16.6902 29.4549C16.3239 29.7411 16.1406 29.884 15.8678 29.9573C15.6558 30.0142 15.3439 30.0142 15.1319 29.9573C14.8596 29.8841 14.675 29.7398 14.3101 29.4547ZM12.3473 10.1685C12.3473 11.8185 13.7585 13.156 15.4994 13.156C17.2402 13.156 18.6515 11.8185 18.6515 10.1685C18.6515 8.5186 17.2402 7.18106 15.4994 7.18106C13.7585 7.18106 12.3473 8.5186 12.3473 10.1685Z"
+            fill="#F77B4F" />
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M14.3101 29.4547C11.7604 27.4622 6 17.2513 6 10.9669C6 8.58868 7.0009 6.30826 8.7825 4.62658C10.5641 2.9449 12.9806 2 15.5002 2C18.0197 2 20.4359 2.94476 22.2176 4.62644C23.9992 6.30812 25 8.58925 25 10.9675C25 17.2519 19.2399 27.4624 16.6902 29.4549C16.3239 29.7411 16.1406 29.884 15.8678 29.9573C15.6558 30.0142 15.3439 30.0142 15.1319 29.9573C14.8596 29.8841 14.675 29.7398 14.3101 29.4547ZM12.3473 10.1685C12.3473 11.8185 13.7585 13.156 15.4994 13.156C17.2402 13.156 18.6515 11.8185 18.6515 10.1685C18.6515 8.5186 17.2402 7.18106 15.4994 7.18106C13.7585 7.18106 12.3473 8.5186 12.3473 10.1685Z"
+            stroke="#303348" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        </g>
+        <defs>
+          <filter id="filter0_d_716_228" x="0" y="0" width="31" height="40" filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha" />
+            <feOffset dy="4" />
+            <feGaussianBlur stdDeviation="2" />
+            <feComposite in2="hardAlpha" operator="out" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0" />
+            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_716_228" />
+            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_716_228" result="shape" />
+          </filter>
+        </defs>
+      </svg></button>
+    <button class="nav-btn" onclick="navigateTo('lexikon.html')" aria-label="Suche"><svg class="nav-icon"
+        viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g filter="url(#filter0_d_716_301)">
+          <path
+            d="M6 9.22222C6 13.2109 9.2335 16.4444 13.2222 16.4444C17.2109 16.4444 20.4444 13.2109 20.4444 9.22222C20.4444 5.2335 17.2109 2 13.2222 2C9.2335 2 6 5.2335 6 9.22222Z"
+            fill="#F77B4F" />
+          <path
+            d="M18.3799 14.2778L32 28M13.2222 16.4444C9.2335 16.4444 6 13.2109 6 9.22222C6 5.2335 9.2335 2 13.2222 2C17.2109 2 20.4444 5.2335 20.4444 9.22222C20.4444 13.2109 17.2109 16.4444 13.2222 16.4444Z"
+            stroke="#303348" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        </g>
+        <defs>
+          <filter id="filter0_d_716_301" x="0" y="0" width="38" height="38" filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha" />
+            <feOffset dy="4" />
+            <feGaussianBlur stdDeviation="2" />
+            <feComposite in2="hardAlpha" operator="out" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0" />
+            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_716_301" />
+            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_716_301" result="shape" />
+          </filter>
+        </defs>
+      </svg></button>
+    <button class="nav-btn active" onclick="navigateTo('marked.html')" aria-label="Gespeichert"><svg class="nav-icon"
+        viewBox="0 0 42 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g filter="url(#filter0_d_716_300)">
+          <path
+            d="M25.519 18.435L16.9502 13.1288L12.8791 19.7397L6.51992 15.7722L9.27376 11.3583L5.9978 9.31443L8.75164 4.90056L12.0276 6.94445L15.1119 2.00093L21.4711 5.96848L16.9502 13.1288L25.519 18.435L29.9501 11.2586L35.7312 14.8654L32.6469 19.809L35.7301 21.7326L32.9763 26.1465L29.893 24.2228L27.1392 28.6367L21.3581 25.0298L25.519 18.435Z"
+            fill="#F77B4F" />
+          <path
+            d="M16.9502 13.1288L25.519 18.435M16.9502 13.1288L12.8791 19.7397L6.51992 15.7722L9.27376 11.3583L5.9978 9.31443L8.75164 4.90056L12.0276 6.94445L15.1119 2.00093L21.4711 5.96848L16.9502 13.1288ZM25.519 18.435L29.9501 11.2586L35.7312 14.8654L32.6469 19.809L35.7301 21.7326L32.9763 26.1465L29.893 24.2228L27.1392 28.6367L21.3581 25.0298L25.519 18.435Z"
+            stroke="#303348" stroke-width="4" stroke-linejoin="round" />
+        </g>
+        <defs>
+          <filter id="filter0_d_716_300" x="0" y="0" width="41.7344" height="38.6367" filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha" />
+            <feOffset dy="4" />
+            <feGaussianBlur stdDeviation="2" />
+            <feComposite in2="hardAlpha" operator="out" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0" />
+            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_716_300" />
+            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_716_300" result="shape" />
+          </filter>
+        </defs>
+      </svg></button>
+    <button class="nav-btn" onclick="navigateTo('settings.html')" aria-label="Einstellungen"><svg class="nav-icon"
+        viewBox="0 0 42 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g filter="url(#filter0_d_716_302)">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M32.9802 11.1282L33.5298 11.4307L33.5324 11.432C34.4265 11.9242 34.8739 12.1705 35.2 12.5206C35.4889 12.8306 35.7079 13.1984 35.8422 13.5986C35.9939 14.0509 35.9952 14.5578 35.9975 15.5723L35.9995 16.425C36.0018 17.4344 36.003 17.9421 35.8524 18.3949C35.7185 18.7978 35.4994 19.1672 35.2089 19.4791C34.8805 19.8317 34.4284 20.0797 33.5257 20.5747L32.9832 20.8723L32.9803 20.8736C32.8979 20.9188 32.8564 20.9415 32.8161 20.9653C32.4037 21.2087 32.0564 21.5465 31.8032 21.9502C31.7782 21.9902 31.7532 22.0314 31.7049 22.1141C31.6568 22.1965 31.6325 22.2382 31.6101 22.2796C31.3833 22.6981 31.2614 23.1649 31.2543 23.6397C31.2536 23.6867 31.2538 23.7342 31.2554 23.8297L31.2665 24.4823C31.2836 25.483 31.2921 25.9871 31.1499 26.4393C31.0232 26.8422 30.8112 27.2136 30.528 27.5291C30.2087 27.8848 29.7661 28.139 28.8834 28.646L28.1406 29.0726C27.251 29.5836 26.805 29.8397 26.3316 29.9375C25.9123 30.0242 25.4793 30.0204 25.0613 29.9276C24.5887 29.8227 24.1469 29.5604 23.2625 29.035L22.6981 28.6997C22.6333 28.6612 22.5965 28.6393 22.5597 28.619C22.1414 28.3882 21.6729 28.2601 21.1943 28.2449C21.1461 28.2434 21.0972 28.2434 20.9991 28.2434C20.9012 28.2434 20.8522 28.2434 20.8041 28.2449C20.3266 28.2601 19.8609 28.3877 19.4433 28.6175C19.4012 28.6407 19.3587 28.6656 19.2747 28.7154L18.7437 29.03C17.863 29.5519 17.4221 29.8132 16.9515 29.9177C16.5352 30.0102 16.1038 30.0135 15.6859 29.9279C15.2136 29.8312 14.769 29.5778 13.8794 29.0704L13.1385 28.648C12.2464 28.1392 11.8001 27.8847 11.4782 27.5277C11.1934 27.2118 10.9804 26.8397 10.8529 26.4357C10.7088 25.9789 10.7164 25.4689 10.7338 24.4501L10.7441 23.8449C10.7459 23.7425 10.7466 23.6915 10.7457 23.6412C10.7377 23.1749 10.6199 22.7167 10.3998 22.3043C10.3809 22.269 10.3604 22.2336 10.327 22.1761L10.2983 22.1264C10.2462 22.0364 10.2202 21.9914 10.193 21.9481C9.94201 21.5467 9.59776 21.21 9.18913 20.9665C9.15271 20.9448 9.11499 20.9241 9.05149 20.8892L9.00744 20.865L8.46972 20.5689C7.57386 20.0757 7.1271 19.8295 6.80061 19.4791C6.51176 19.1691 6.29393 18.8013 6.15968 18.4011C6.00793 17.9488 6.00474 17.4419 6.00241 16.4274L6.00049 15.5926C5.99815 14.5713 5.99802 14.0606 6.14943 13.6051C6.28338 13.2022 6.50281 12.8322 6.79328 12.5204C7.12163 12.1678 7.57288 11.9201 8.47558 11.425L9.01814 11.1275L9.06018 11.1044C9.1181 11.0727 9.15298 11.0536 9.18638 11.0339C9.59875 10.7906 9.94572 10.453 10.1989 10.0493C10.2182 10.0186 10.2364 9.9872 10.2658 9.93675L10.2956 9.8855C10.3439 9.80282 10.368 9.76143 10.3905 9.72005C10.6172 9.30154 10.7411 8.83503 10.7482 8.36021C10.7486 8.33302 10.7479 8.30567 10.7468 8.26892C10.7461 8.24222 10.7452 8.21047 10.7445 8.1703L10.7338 7.53968C10.7165 6.52434 10.7089 6.01639 10.8521 5.56089C10.9788 5.15792 11.1906 4.78635 11.4738 4.47085C11.793 4.11531 12.2351 3.86137 13.1172 3.35473L13.1253 3.34982L13.8571 2.92952L13.8611 2.92778C14.7512 2.41653 15.1963 2.1609 15.6698 2.06303C16.0891 1.97634 16.5218 1.97891 16.9398 2.07173C17.4123 2.17664 17.8551 2.4397 18.7393 2.96505L19.2737 3.2825L19.3184 3.30908C19.3741 3.34226 19.4077 3.36229 19.4416 3.381C19.8599 3.61171 20.327 3.73944 20.8056 3.75468C20.8536 3.75621 20.9046 3.75621 21.0019 3.75621C21.0998 3.75621 21.1488 3.75621 21.1969 3.75468C21.6745 3.73951 22.1406 3.61247 22.5582 3.38271C22.6003 3.35956 22.6428 3.33448 22.7267 3.28473L23.2577 2.97012L23.2627 2.96776C24.1409 2.44735 24.5803 2.18699 25.0502 2.0826C25.4665 1.99011 25.8977 1.98615 26.3155 2.07173C26.7878 2.16846 27.2328 2.42221 28.1224 2.92952L28.8634 3.35209C29.7555 3.86082 30.201 4.1155 30.523 4.4725C30.8077 4.78832 31.021 5.16047 31.1485 5.56452C31.292 6.0194 31.2834 6.52626 31.2662 7.53684L31.2554 8.16835C31.2538 8.26512 31.2536 8.31379 31.2544 8.36142C31.2617 8.83528 31.384 9.30083 31.6101 9.71859C31.6328 9.76055 31.6575 9.80293 31.7063 9.88657L31.7411 9.9464C31.7683 9.99312 31.786 10.0237 31.8045 10.0531C32.0565 10.4546 32.4019 10.7903 32.8117 11.0332C32.8529 11.0576 32.8949 11.0812 32.9802 11.1282ZM14.9981 16.0001C14.9981 19.2807 17.6855 21.9401 21.0005 21.9401C24.3155 21.9401 27.0028 19.2807 27.0028 16.0001C27.0028 12.7195 24.3155 10.0601 21.0005 10.0601C17.6855 10.0601 14.9981 12.7195 14.9981 16.0001Z"
+            fill="#F77B4F" />
+          <path
+            d="M10.327 22.1761C10.3184 22.1612 10.3088 22.1447 10.2983 22.1264C10.2462 22.0364 10.2202 21.9914 10.193 21.9481C9.94201 21.5467 9.59776 21.21 9.18913 20.9665C9.15271 20.9448 9.11499 20.9241 9.05149 20.8892C9.03804 20.8818 9.02343 20.8738 9.00744 20.865L8.46972 20.5689C7.57386 20.0757 7.1271 19.8295 6.80061 19.4791C6.51176 19.1691 6.29393 18.8013 6.15968 18.4011C6.00793 17.9488 6.00474 17.4419 6.00241 16.4274L6.00049 15.5926C5.99815 14.5713 5.99802 14.0606 6.14943 13.6051C6.28338 13.2022 6.50281 12.8322 6.79328 12.5204C7.12163 12.1678 7.57288 11.9201 8.47558 11.425L9.01814 11.1275C9.03343 11.1191 9.04737 11.1114 9.06018 11.1044C9.1181 11.0727 9.15298 11.0536 9.18638 11.0339C9.59875 10.7906 9.94572 10.453 10.1989 10.0493C10.2182 10.0186 10.2364 9.9872 10.2658 9.93675C10.2746 9.92156 10.2844 9.90464 10.2956 9.8855C10.3439 9.80282 10.368 9.76143 10.3905 9.72005C10.6172 9.30154 10.7411 8.83503 10.7482 8.36021C10.7486 8.33302 10.7479 8.30567 10.7468 8.26892C10.7461 8.24222 10.7452 8.21047 10.7445 8.1703L10.7338 7.53968C10.7165 6.52434 10.7089 6.01639 10.8521 5.56089C10.9788 5.15792 11.1906 4.78635 11.4738 4.47085C11.793 4.11531 12.2351 3.86137 13.1172 3.35473L13.1253 3.34982L13.8571 2.92952L13.8611 2.92778C14.7512 2.41653 15.1963 2.1609 15.6698 2.06303C16.0891 1.97634 16.5218 1.97891 16.9398 2.07173C17.4123 2.17664 17.8551 2.4397 18.7393 2.96505L19.2737 3.2825C19.2901 3.29224 19.3049 3.30105 19.3184 3.30908M9.00744 20.865L9.05149 20.8892M9.01814 11.1275L9.06018 11.1044M19.2737 3.2825L19.3184 3.30908M31.7063 9.88657C31.6575 9.80293 31.6328 9.76055 31.6101 9.71859C31.384 9.30083 31.2617 8.83528 31.2544 8.36142C31.2536 8.31379 31.2538 8.26512 31.2554 8.16835L31.2662 7.53684C31.2834 6.52626 31.292 6.0194 31.1485 5.56452C31.021 5.16047 30.8077 4.78832 30.523 4.4725C30.201 4.1155 29.7555 3.86082 28.8634 3.35209L28.1224 2.92952C27.2328 2.42221 26.7878 2.16846 26.3155 2.07173C25.8977 1.98615 25.4665 1.99011 25.0502 2.0826C24.5803 2.18699 24.1409 2.44735 23.2627 2.96776L23.2577 2.97012L22.7267 3.28473C22.6428 3.33448 22.6003 3.35956 22.5582 3.38271C22.1406 3.61247 21.6745 3.73951 21.1969 3.75468C21.1488 3.75621 21.0998 3.75621 21.0019 3.75621C20.9046 3.75621 20.8536 3.75621 20.8056 3.75468C20.327 3.73944 19.8599 3.61171 19.4416 3.381C19.4077 3.36229 19.3741 3.34226 19.3184 3.30908M31.7063 9.88657L31.7411 9.9464M10.327 22.1761C10.3604 22.2336 10.3809 22.269 10.3998 22.3043C10.6199 22.7167 10.7377 23.1749 10.7457 23.6412C10.7466 23.6915 10.7459 23.7425 10.7441 23.8449L10.7338 24.4501C10.7164 25.4689 10.7088 25.9789 10.8529 26.4357C10.9804 26.8397 11.1934 27.2118 11.4782 27.5277C11.8001 27.8847 12.2464 28.1392 13.1385 28.648L13.8794 29.0704C14.769 29.5778 15.2136 29.8312 15.6859 29.9279C16.1038 30.0135 16.5352 30.0102 16.9515 29.9177C17.4221 29.8132 17.863 29.5519 18.7437 29.03L19.2747 28.7154C19.3587 28.6656 19.4012 28.6407 19.4433 28.6175C19.8609 28.3877 20.3266 28.2601 20.8041 28.2449C20.8522 28.2434 20.9012 28.2434 20.9991 28.2434C21.0972 28.2434 21.1461 28.2434 21.1943 28.2449C21.6729 28.2601 22.1414 28.3882 22.5597 28.619C22.5965 28.6393 22.6333 28.6612 22.6981 28.6997L23.2625 29.035C24.1469 29.5604 24.5887 29.8227 25.0613 29.9276C25.4793 30.0204 25.9123 30.0242 26.3316 29.9375C26.805 29.8397 27.251 29.5836 28.1406 29.0726L28.8834 28.646C29.7661 28.139 30.2087 27.8848 30.528 27.5291C30.8112 27.2136 31.0232 26.8422 31.1499 26.4393C31.2921 25.9871 31.2836 25.483 31.2665 24.4823L31.2554 23.8297C31.2538 23.7342 31.2536 23.6867 31.2543 23.6397C31.2614 23.1649 31.3833 22.6981 31.6101 22.2796C31.6325 22.2382 31.6568 22.1965 31.7049 22.1141C31.7532 22.0314 31.7782 21.9902 31.8032 21.9502C32.0564 21.5465 32.4037 21.2087 32.8161 20.9653C32.8564 20.9415 32.8979 20.9188 32.9803 20.8736L32.9832 20.8723L33.5257 20.5747C34.4284 20.0797 34.8805 19.8317 35.2089 19.4791C35.4994 19.1672 35.7185 18.7978 35.8524 18.3949C36.003 17.9421 36.0018 17.4344 35.9995 16.425L35.9975 15.5723C35.9952 14.5578 35.9939 14.0509 35.8422 13.5986C35.7079 13.1984 35.4889 12.8306 35.2 12.5206C34.8739 12.1705 34.4265 11.9242 33.5324 11.432L33.5298 11.4307L32.9802 11.1282C32.8949 11.0812 32.8529 11.0576 32.8117 11.0332C32.4019 10.7903 32.0565 10.4546 31.8045 10.0531C31.786 10.0237 31.7683 9.99312 31.7411 9.9464C31.731 9.92898 31.7196 9.9093 31.7063 9.88657M10.2956 9.8855L10.2658 9.93675M10.2983 22.1264L10.327 22.1761M21.0005 21.9401C17.6855 21.9401 14.9981 19.2807 14.9981 16.0001C14.9981 12.7195 17.6855 10.0601 21.0005 10.0601C24.3155 10.0601 27.0028 12.7195 27.0028 16.0001C27.0028 19.2807 24.3155 21.9401 21.0005 21.9401Z"
+            stroke="#303348" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        </g>
+        <defs>
+          <filter id="filter0_d_716_302" x="0" y="0" width="42" height="40" filterUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha" />
+            <feOffset dy="4" />
+            <feGaussianBlur stdDeviation="2" />
+            <feComposite in2="hardAlpha" operator="out" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0" />
+            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_716_302" />
+            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_716_302" result="shape" />
+          </filter>
+        </defs>
+      </svg></button>
+  </nav>
+
+  <script src="script.js"></script>
+  <script>
+    // ── State ──
+    let exerciseWords = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let isListening = false;
+    let animating = false;
+    let recognition = null;
+
+    // ── Speech Recognition setup ──
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognitionAPI) {
+      recognition = new SpeechRecognitionAPI();
+      recognition.lang = 'de-CH';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onresult = function (e) {
+        const spoken = e.results[0][0].transcript.trim();
+        setListening(false);
+        document.getElementById('spokenFeedback').textContent = '„' + spoken + '"';
+        setTimeout(function () {
+          document.getElementById('spokenFeedback').textContent = '';
+          checkAnswer(spoken);
+        }, 700);
+      };
+
+      recognition.onerror = function () { setListening(false); };
+      recognition.onend = function () { setListening(false); };
+    } else {
+      // No speech recognition (e.g. iOS Safari) → use the typed-answer fallback
+      document.getElementById('voiceControls').style.display = 'none';
+      document.getElementById('typeControls').style.display = 'flex';
+    }
+
+    function submitTyped(e) {
+      e.preventDefault();
+      if (animating) return;
+      const input = document.getElementById('typeInput');
+      const val = input.value.trim();
+      if (!val) return;
+      input.value = '';
+      document.getElementById('spokenFeedback').textContent = '„' + val + '"';
+      setTimeout(function () {
+        document.getElementById('spokenFeedback').textContent = '';
+        checkAnswer(val);
+      }, 500);
+    }
+
+    function setListening(val) {
+      isListening = val;
+      const btn = document.getElementById('micBtn');
+      if (val) startVoiceViz(btn);
+      else stopVoiceViz(btn);
+    }
+
+    buildVoiceBars(document.getElementById('micBtn'));
+
+    function startVoice() {
+      if (!recognition || animating) return;
+      if (isListening) { recognition.stop(); return; }
+      setListening(true);
+      try { recognition.start(); } catch (e) { setListening(false); }
+    }
+
+    // ── Answer matching ──
+    function normalize(str) {
+      return str.toLowerCase()
+        .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue')
+        .replace(/[^a-z]/g, '');
+    }
+
+    function levenshtein(a, b) {
+      const m = a.length, n = b.length;
+      if (!m) return n;
+      if (!n) return m;
+      const dp = Array.from({ length: m + 1 }, (_, i) => [i]);
+      for (let j = 0; j <= n; j++) dp[0][j] = j;
+      for (let i = 1; i <= m; i++)
+        for (let j = 1; j <= n; j++)
+          dp[i][j] = a[i - 1] === b[j - 1]
+            ? dp[i - 1][j - 1]
+            : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      return dp[m][n];
+    }
+
+    function checkAnswer(spoken) {
+      const entry = exerciseWords[currentIndex];
+      const ns = normalize(spoken);
+      const correct = entry.baseldeutsch.some(function (w) {
+        const nw = normalize(w);
+        if (ns === nw) return true;
+        if (ns.includes(nw) || nw.includes(ns)) return true;
+        if (Math.abs(ns.length - nw.length) <= 3 && levenshtein(ns, nw) <= 2) return true;
+        return false;
+      });
+      if (correct) handleCorrect();
+      else handleWrong();
+    }
+
+    // ── Card flow ──
+    function animateCard(direction) {
+      if (animating) return;
+      animating = true;
+      if (isListening) recognition.stop();
+      const card = document.getElementById('exerciseCard');
+      // Little wind-up hop, then slide off in the answer direction
+      card.style.setProperty('--dir', direction === 'right' ? '160%' : '-160%');
+      card.style.setProperty('--rot', direction === 'right' ? '12deg' : '-12deg');
+      card.style.transition = 'none';
+      card.classList.add('slide-out');
+      setTimeout(function () {
+        currentIndex++;
+        if (currentIndex >= exerciseWords.length) {
+          showResults();
+        } else {
+          card.classList.remove('slide-out');
+          card.style.transition = 'none';
+          card.style.transform = '';
+          card.style.opacity = '1';
+          void card.offsetWidth;
+          animating = false;
+          showCard();
+        }
+      }, 560);
+    }
+
+    function handleCorrect() { correctCount++; animateCard('left'); }
+    function handleWrong() { wrongCount++; animateCard('right'); }
+
+    let peeking = false;
+
+    function peekDialect() {
+      if (animating || peeking) return;
+      peeking = true;
+
+      const card = document.getElementById('exerciseCard');
+      const wordEl = document.getElementById('cardWord');
+      const entry = exerciseWords[currentIndex];
+      const original = entry.german;
+      const dialect = entry.baseldeutsch[0];
+      const half = 'transform 0.25s ease-in-out';
+
+      // Flip to edge-on, swap to dialect, then flip back to reveal it
+      card.style.transition = half;
+      card.style.transform = 'rotateY(90deg)';
+      setTimeout(function () {
+        wordEl.textContent = dialect;
+        card.style.transform = 'rotateY(0deg)';
+      }, 250);
+
+      // After 2s on screen, flip again to reveal the original word
+      setTimeout(function () {
+        card.style.transform = 'rotateY(90deg)';
+        setTimeout(function () {
+          wordEl.textContent = original;
+          card.style.transform = 'rotateY(0deg)';
+          setTimeout(function () {
+            card.style.transition = '';
+            card.style.transform = '';
+            peeking = false;
+          }, 250);
+        }, 250);
+      }, 2250);
+    }
+
+    function showCard() {
+      const entry = exerciseWords[currentIndex];
+      document.getElementById('cardWord').textContent = entry.german;
+      document.getElementById('progressText').textContent =
+        (currentIndex + 1) + ' / ' + exerciseWords.length;
+      document.getElementById('spokenFeedback').textContent = '';
+      // Show stacked cards only when more cards remain (none on the last card)
+      const rem = exerciseWords.length - currentIndex;
+      document.getElementById('cardShadow1').style.visibility = rem > 1 ? 'visible' : 'hidden';
+      document.getElementById('cardShadow2').style.visibility = rem > 2 ? 'visible' : 'hidden';
+    }
+
+    function startUeben() {
+      const words = getMarked();
+      if (!words.length) return;
+      exerciseWords = words.slice().sort(function () { return Math.random() - 0.5; });
+      currentIndex = 0;
+      correctCount = 0;
+      wrongCount = 0;
+      animating = false;
+      peeking = false;
+      const card = document.getElementById('exerciseCard');
+      card.classList.remove('slide-out');
+      card.style.transition = 'none';
+      card.style.transform = '';
+      card.style.opacity = '1';
+      void card.offsetWidth;
+      showView('exercise');
+      showCard();
+    }
+
+    function animateTitle(title, animate) {
+      const titleEl = document.getElementById('resultsTitle');
+      let letterIndex = 0;
+      titleEl.innerHTML = title.split('').map(function (char) {
+        if (char === ' ') return '<div style="flex-basis: 100%; height: 0;"></div>';
+        if (!animate) return '<span>' + esc(char) + '</span>';
+        return '<span class="letter" style="animation-delay: ' + (letterIndex++ * 0.08) + 's">' + esc(char) + '</span>';
+      }).join('');
+    }
+
+    function celebrate(on) {
+      const wrap = document.getElementById('resultsTitleWrap');
+      wrap.querySelectorAll('.sparkle').forEach(function (s) { s.remove(); });
+      if (!on) return;
+
+      const star = '<svg viewBox="0 0 28 28"><path d="M14 1C15 9 19 13 27 14C19 15 15 19 14 27C13 19 9 15 1 14C9 13 13 9 14 1Z"/></svg>';
+      const positions = [
+        { top: '-20px', left: '-16px', size: 26, delay: 0 },
+        { top: '30px', left: '-24px', size: 17, delay: 0.35 },
+        { top: '-6px', left: '40px', size: 13, delay: 0.7 },
+        { bottom: '2px', right: '-18px', size: 26, delay: 0.18 },
+        { bottom: '40px', right: '-8px', size: 17, delay: 0.5 },
+        { bottom: '-8px', right: '46px', size: 13, delay: 0.85 }
+      ];
+      positions.forEach(function (p) {
+        const el = document.createElement('div');
+        el.className = 'sparkle';
+        el.style.width = p.size + 'px';
+        el.style.height = p.size + 'px';
+        if (p.top) el.style.top = p.top;
+        if (p.left) el.style.left = p.left;
+        if (p.bottom) el.style.bottom = p.bottom;
+        if (p.right) el.style.right = p.right;
+        el.style.animationDelay = p.delay + 's';
+        el.innerHTML = star;
+        wrap.appendChild(el);
+      });
+    }
+
+    function showResults() {
+      animating = false;
+      const total = correctCount + wrongCount;
+      const pct = total > 0 ? correctCount / total : 0;
+      const title = pct >= 0.8 ? 'Gut gemacht!' : pct >= 0.4 ? 'Nicht schlecht' : 'Es geht besser';
+      animateTitle(title, pct >= 0.4);
+      celebrate(pct >= 0.8);
+      document.getElementById('resultCorrect').textContent = correctCount;
+      document.getElementById('resultWrong').textContent = wrongCount;
+      showView('results');
+    }
+
+    function backToList() {
+      showView('list');
+      render();
+    }
+
+    function showView(name) {
+      ['list', 'exercise', 'results'].forEach(function (v) {
+        document.getElementById(v + 'View').classList.toggle('active', v === name);
+      });
+    }
+
+    // ── List / storage ──
+    function esc(text) {
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function getMarked() {
+      return JSON.parse(localStorage.getItem('markedWords') || '[]');
+    }
+
+    function removeMarked(german) {
+      const words = getMarked().filter(function (w) { return w.german !== german; });
+      localStorage.setItem('markedWords', JSON.stringify(words));
+      render();
+    }
+
+    function render() {
+      const words = getMarked();
+      const list = document.getElementById('wordList');
+      // Grey out the Üben button when there is nothing to practise
+      document.getElementById('ubenBtn').classList.toggle('disabled', !words.length);
+      if (!words.length) {
+        list.innerHTML = '<div class="no-results">Keine gespeicherten Wörter</div>';
+        return;
+      }
+      list.innerHTML = words.map(function (w) {
+        return '<div class="word-entry">'
+          + '<div class="word-labels">'
+          + '<span class="entry-german">' + esc(w.german) + '</span>'
+          + '<span class="entry-dialect">' + esc(w.baseldeutsch[0]) + '</span>'
+          + '</div>'
+          + '<button class="remove-btn" onclick="removeMarked(\'' + w.german.replace(/'/g, "\\'") + '\')" aria-label="Entfernen">'
+          + '<svg viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3.5" stroke-linecap="round"><path d="M6 6 L18 18 M18 6 L6 18"/></svg>'
+          + '</button></div>';
+      }).join('');
+    }
+
+    render();
+    setupHint('hintList', 'hintMarkedList');
+    setupHint('hintExercise', 'hintExercise');
+  </script>
+
+</body>
+
+</html>

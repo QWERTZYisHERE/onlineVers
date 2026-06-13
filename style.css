@@ -1,0 +1,305 @@
+@keyframes page-enter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes page-exit {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+body {
+  animation: page-enter 0.3s ease both;
+}
+
+body.exiting {
+  animation: page-exit 0.22s ease both;
+}
+
+/* ─────────────────────────────────────────
+   Color tokens — edit here to restyle the app
+   ───────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg:             #ffffff;
+  --bg-card:        #ffffff;
+  --bg-hover:       #e8e4e4;
+
+  /* Borders */
+  --border:         #959AA2;
+  --border-nav:     #303348;
+
+  /* Text */
+  --text:           #3E3232;
+  --text-muted:     #777777;
+  --text-dim:       #999999;
+
+  /* Accent — same in both modes */
+  --accent:         #691A1A;
+  --accent-light:   #F77B4F;
+  --light:          #AFF6F9;
+
+  /* Lesson vowel highlight */
+  --vowel:          #31B0E2;
+  --vowel-alt:      #E8453C;
+
+  --soft-cons:      #BE24E8;
+
+  /* Body-text size multiplier, driven by the settings slider (titles opt out) */
+  --font-scale:     1;
+
+  /* Semantic */
+  --result-correct: #4a7c44;
+  --result-wrong:   #c0392b;
+
+  /* Map */
+  --map-fill:          #DBC8C2;   /* interior fill areas */
+  --map-extrude:       #F77B4F;   /* extruded 3-D side areas */
+  --map-highlight:     #FFF369;   /* special highlight area */
+  --map-border:        #303348;   /* map outline stroke */
+  --map-lock-bg:       #ffffff;   /* lock circle background */
+  --map-lock-ring:     #303348;   /* lock ring / body */
+  --map-lock-shackle:  #303348;   /* lock shackle stroke */
+  --map-lock-hole:     #ffffff;   /* keyhole cut-out (matches bg) */
+}
+
+[data-theme="dark"] {
+  /* Backgrounds */
+  --bg:             #4C4848;
+  --bg-card:        #4C4848;
+  --bg-hover:       #555555;
+
+  /* Borders */
+  --border:         #A29595;
+  --border-nav:     #776E6E;
+
+  /* Text */
+  --text:           #ffffff;
+  --text-muted:     #888888;
+  --text-dim:       #aaaaaa;
+
+  /* Lesson vowel highlight */
+  --vowel:          #31B0E2;
+  --vowel-alt:      #E8453C;
+
+  /* Map */
+  --map-fill:          #3D3535;
+  --map-extrude:       #8B4A30;
+  --map-highlight:     #7A7A30;
+  --map-border:        #A09898;
+  --map-lock-bg:       #4C4848;
+  --map-lock-ring:     #A09898;
+  --map-lock-shackle:  #A09898;
+  --map-lock-hole:     #4C4848;
+}
+
+.spec-btn {
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--border-nav);
+  color: var(--text);
+  font-family: "Manrope", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  padding: 7px 10px;
+  cursor: pointer;
+  border-radius: 30px;
+  white-space: nowrap;
+  background: var(--accent-light);
+  color: #fff;
+  width: 120px;
+  margin-top: 40px;
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+}
+.spec-btn2 {
+  border-width: 2px 2px 5px 2px;
+  border-style: solid;
+  border-color: var(--border);
+  color: var(--text);
+  font-family: "Manrope", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  padding: 7px 10px;
+  cursor: pointer;
+  border-radius: 30px;
+  white-space: nowrap;
+  background: var(--accent-light);
+  border-color: var(--light);
+  color: #fff;
+  width: 140px;
+  margin-top: 20px;
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+/* ─────────────────────────────────────────
+   Voice (microphone) button with waveform
+   ───────────────────────────────────────── */
+.voice-btn {
+  --voice-bg:     #6AA876;   /* muted when idle */
+  --voice-border: #0C2B12;
+  border: solid var(--border-nav);
+  border-width: 5px;
+  border-radius: 26px;
+  background: var(--voice-bg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 180px;
+  height: 100px;
+  padding: 0 22px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
+}
+
+/* Active = voice detected: more intense green */
+.voice-btn.active {
+  --voice-bg:     #29E84C;
+  --voice-border: var(--border-nav);
+}
+
+.voice-btn:active {
+  filter: brightness(0.92);
+}
+
+.voice-btn:disabled {
+  opacity: 0.5;
+}
+
+.voice-btn .bars {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+}
+
+/* Idle: small dots. Heights are driven by JS while listening. */
+.voice-btn .bars span {
+  width: 12px;
+  height: 12px;
+  border-radius: 10px;
+  background: #fff;
+  transition: height 0.09s ease-out;
+}
+
+/* ─────────────────────────────────────────
+   Wrong / skip button (red square with an X)
+   ───────────────────────────────────────── */
+.wrong-btn {
+  --wrong-bg:     #df2f2f;
+  --wrong-border: var(--border-nav);
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border: solid var(--wrong-border);
+  border-width: 5px;
+  border-radius: 26px;
+  background: var(--wrong-bg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: filter 0.2s ease;
+}
+
+.wrong-btn:active {
+  filter: brightness(0.92);
+}
+
+/* The white X — two crossed bars */
+.wrong-btn::before,
+.wrong-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 10px;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.wrong-btn::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.wrong-btn::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* Bottom-nav icons — inlined SVG; fill recolours, stroke stays #303348 */
+.nav-btn .nav-icon {
+  height: 40px;
+  width: auto;
+  display: block;
+  pointer-events: none;
+}
+
+/* Active state: only the filled shape turns cyan, the outline keeps #303348 */
+.nav-btn.active .nav-icon path[fill="#F77B4F"] {
+  fill: var(--light);
+}
+
+/* ─────────────────────────────────────────
+   Dismissible screen hint (orange box + ×)
+   ───────────────────────────────────────── */
+.hint-box {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 96px;
+  max-width: 361px;
+  margin: 0 auto;
+  background: var(--accent-light);
+  color: #fff;
+  border: 3px solid var(--border-nav);
+  border-radius: 14px;
+  padding: 16px 46px 16px 18px;
+  font-family: "Manrope", sans-serif;
+  font-size: calc(16px * var(--font-scale));
+  font-weight: 700;
+  line-height: 1.35;
+  z-index: 90;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.18));
+}
+
+/* Variant pinned to the top (e.g. the exercise-card hint) */
+.hint-box.hint-top {
+  bottom: auto;
+  top: 44px;
+}
+
+.hint-box.dismissed {
+  display: none;
+}
+
+.hint-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hint-close::before,
+.hint-close::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 3px;
+  border-radius: 2px;
+  background: #fff;
+}
+
+.hint-close::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.hint-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
