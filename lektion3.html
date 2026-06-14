@@ -106,8 +106,28 @@
       user-select: none;
     }
 
+    /* "yy" quick-up: vertical stretch from the baseline (like the letter-scaler app) */
     .word .v {
       color: var(--vowel);
+      display: inline-block;
+      transform-origin: bottom center;
+      animation: yStretch calc(1.8s * var(--anim-scale, 1)) ease-in-out infinite;
+    }
+
+    .word .v>span {
+      display: inline-block;
+      transform-origin: bottom center;
+      animation: yStretchInner calc(1.8s * var(--anim-scale, 1)) ease-in-out infinite;
+    }
+
+    @keyframes yStretch {
+      0%, 55%, 100% { transform: scaleY(1); }
+      75% { transform: scaleY(2); }
+    }
+
+    @keyframes yStretchInner {
+      0%, 55%, 100% { transform: scaleY(1); }
+      75% { transform: scaleY(0.8); }
     }
 
     /* ── Mic ── */
@@ -286,7 +306,7 @@
   <div class="lesson-body">
     <img class="rhine-img" src="image.png" alt="Der Rhein in Basel">
 
-    <div class="word">Rh<span class="v">yy</span></div>
+    <div class="word">Rh<span class="v"><span>yy</span></span></div>
 
     <div class="feedback" id="feedback"></div>
 

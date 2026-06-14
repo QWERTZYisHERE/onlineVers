@@ -64,7 +64,7 @@
 
     /* ── List view ── */
     .uben-container {
-      padding: 14px 20px 0px;
+      padding: 44px 20px 0px;
       background: transparent;
       flex-shrink: 0;
     }
@@ -234,7 +234,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      margin-top: 30%;
+      margin-top: 40%;
     }
 
     .exercise-card,
@@ -449,7 +449,7 @@
     .sparkle svg path {
       fill: var(--light);
       stroke: var(--border-nav);
-      stroke-width: 1.5;
+      stroke-width: 3;
       stroke-linejoin: round;
     }
 
@@ -541,8 +541,8 @@
 </head>
 
 <body>
-
-  <div class="top-bar"></div>
+    <div class="hint-box" id="hintList">Hier werden die Wörter geübt, die du gesammelt hast!<button class="hint-close"
+        aria-label="Schliessen"></button></div>
 
   <!-- View 1: Saved word list -->
   <div class="view active" id="listView">
@@ -557,8 +557,7 @@
       </button>
     </div>
     <div class="word-list" id="wordList"></div>
-    <div class="hint-box" id="hintList">Hier werden die Wörter geübt, die du gesammelt hast!<button class="hint-close"
-        aria-label="Schliessen"></button></div>
+
   </div>
 
   <!-- View 2: Card exercise -->

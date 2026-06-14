@@ -17,6 +17,20 @@ function applyFontScale() {
 
 applyFontScale();
 
+// ── Animation length (Animationslänge setting) ──
+// Slider stores 1–5; map to a duration multiplier (1 = fast … 5 = slow).
+// Exposed as the --anim-scale CSS variable and the global ANIM_SCALE.
+var ANIM_SCALES = [0.4, 0.7, 1, 1.5, 2.2];
+var ANIM_SCALE = 1;
+
+function applyAnimScale() {
+  var step = parseInt(localStorage.getItem('animSpeed') || '3', 10);
+  ANIM_SCALE = ANIM_SCALES[step - 1] || 1;
+  document.documentElement.style.setProperty('--anim-scale', ANIM_SCALE);
+}
+
+applyAnimScale();
+
 // ── Voice button waveform visualiser (shared) ──
 // Builds the bar row, and while listening animates bar heights from the live
 // microphone level (falls back to a gentle sine wave if mic access is denied).

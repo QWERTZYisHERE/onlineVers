@@ -105,9 +105,37 @@
       font-weight: 800;
       color: var(--text);
       line-height: 1.15;
-      text-align: center;
-      max-width: 320px;
+      max-width: 340px;
       user-select: none;
+      display: inline-flex;
+      align-items: flex-end;
+      justify-content: center;
+      flex-wrap: wrap;
+      cursor: pointer;
+    }
+
+    /* Animated letters (letter-scaler behaviour) */
+    .word .ltr {
+      display: inline-flex;
+      align-items: flex-end;
+      line-height: 1;
+    }
+
+    .word .lv {
+      transform-origin: left center;
+    }
+
+    .word .lv>span {
+      display: inline-block;
+      transform-origin: left center;
+    }
+
+    .word .dl {
+      transform-origin: left bottom;
+    }
+
+    .word .space {
+      width: 12px;
     }
 
     /* ── Mic ── */
@@ -286,9 +314,7 @@
   <div class="lesson-body">
     <img class="fasnacht-img" src="fasnacht.jpg" alt="Basler Fasnacht">
 
-    <div class="word">drey sch<span style="color: var(--vowel)">ee</span>nste <span
-        style="color: var(--soft-cons)">D</span><span style="color: var(--vowel)">ää</span><span
-        style="color: var(--vowel-alt)">g</span>e</div>
+    <div class="word" id="scaleWord" onclick="playWord()"></div>
 
     <div class="feedback" id="feedback"></div>
 
@@ -426,6 +452,89 @@
     document.addEventListener('click', function () {
       document.getElementById('infoBubble').classList.remove('visible');
     });
+
+    /* ── Letter-scaler animation for "drey scheenste Dääge" ── */
+    // type: 'lv' = double vowel (stretch wide), 'dl' = D (stretch + squish), '' = static
+    const WORD = [
+      { x: 'd' }, { x: 'r' }, { x: 'e' }, { x: 'y' }, { space: true },
+      { x: 'sch' }, { x: 'ee', t: 'lv', c: 'var(--vowel)' }, { x: 'nste' }, { br: true },
+      { x: 'D', t: 'dl', c: 'var(--soft-cons)' }, { x: 'ää', t: 'lv', c: 'var(--vowel)' },
+      { x: 'g', c: 'var(--vowel-alt)' }, { x: 'e' }
+    ];
+
+    const SW_FRAMES = {
+      lv: [{ transform: 'scaleX(1)' }, { transform: 'scaleX(1.6)' }, { transform: 'scaleX(1)' }],
+      lvInner: [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0.8)' }, { transform: 'scaleX(1)' }],
+      dl: [{ transform: 'scaleX(1) scaleY(1)' }, { transform: 'scaleX(1.3) scaleY(0.65)' }, { transform: 'scaleX(1) scaleY(1)' }]
+    };
+    const SW_DUR = Math.round(600 * (window.ANIM_SCALE || 1));
+
+    function buildWord() {
+      const stage = document.getElementById('scaleWord');
+      stage.innerHTML = '';
+      WORD.forEach(function (seg) {
+        if (seg.br) {
+          const b = document.createElement('span');
+          b.style.flexBasis = '100%';
+          b.style.height = '0';
+          stage.appendChild(b);
+          return;
+        }
+        if (seg.space) {
+          const sp = document.createElement('span');
+          sp.className = 'ltr space';
+          stage.appendChild(sp);
+          return;
+        }
+        const span = document.createElement('span');
+        span.className = 'ltr' + (seg.t ? ' ' + seg.t : '');
+        if (seg.t) span.dataset.type = seg.t;
+        if (seg.c) span.style.color = seg.c;
+        const inner = document.createElement('span');
+        inner.textContent = seg.x;
+        span.appendChild(inner);
+        stage.appendChild(span);
+      });
+    }
+
+    let swGen = 0;
+
+    async function playWord() {
+      const gen = ++swGen;
+      const letters = Array.from(document.getElementById('scaleWord').children);
+      letters.forEach(function (s) {
+        s.getAnimations().forEach(function (a) { a.cancel(); });
+        if (s.firstElementChild) s.firstElementChild.getAnimations().forEach(function (a) { a.cancel(); });
+      });
+      const rects = letters.map(function (s) { return s.getBoundingClientRect(); });
+
+      for (let i = 0; i < letters.length; i++) {
+        if (gen !== swGen) return;
+        const span = letters[i];
+        const type = span.dataset.type;
+        if (!type) continue;
+        const pending = [];
+
+        // push the following letters aside while this one expands
+        const push = Math.round(rects[i].width * 0.2);
+        for (let j = i + 1; j < letters.length; j++) {
+          pending.push(letters[j].animate(
+            [{ transform: 'translateX(0)' }, { transform: 'translateX(' + push + 'px)' }, { transform: 'translateX(0)' }],
+            { duration: SW_DUR, delay: Math.round(80 * (window.ANIM_SCALE || 1)), easing: 'ease-out', fill: 'none' }
+          ).finished.catch(function () { }));
+        }
+
+        pending.push(span.animate(SW_FRAMES[type], { duration: SW_DUR, easing: 'ease-in-out', fill: 'none' }).finished.catch(function () { }));
+        if (type === 'lv' && span.firstElementChild) {
+          span.firstElementChild.animate(SW_FRAMES.lvInner, { duration: SW_DUR, easing: 'ease-in-out', fill: 'none' });
+        }
+        await Promise.all(pending);
+      }
+    }
+
+    buildWord();
+    // Auto-play shortly after opening; tap the word to replay.
+    setTimeout(playWord, 800);
   </script>
 
 </body>
