@@ -315,8 +315,14 @@
 
   <script src="script.js"></script>
   <script>
-    // Accepted pronunciations of the Baseldeutsch "Rhyy"
-    const accepted = [ 'rii', 'nii', 'mii', 'lie', 'rhii', 'rie', 'ri', 'reh', 'ree', 'rhi', 'rhie' ];
+    // Accepted pronunciations of the Baseldeutsch "Rhyy" (/riː/).
+    // The German recogniser usually autocorrects this single syllable to a real
+    // long-i word — these are the ones it most often returns.
+    const accepted = [
+      'rii', 'nii', 'mii', 'lie', 'rhii', 'rie', 'ri', 'reh', 'ree', 'rhi', 'rhie',
+      'wie', 'sie', 'die', 'hier', 'vier', 'bier', 'ihr', 'ihn', 'ihm', 'wir', 'mir', 'dir',
+      'rhein', 'rein', 'reihe', 'reih', 'rhy', 'rhyy', 'y'
+    ];
     let isListening = false;
     let recognition = null;
     let solved = false;
@@ -439,9 +445,11 @@
     function matches(guess) {
       const ns = normalize(guess);
       if (!ns) return false;
-      // Any guess containing the long-i sound counts (the core of "Rhyy").
-      // Standard German spells it "ie" (e.g. "rie"), so accept that too.
-      if (ns.indexOf('ie') !== -1 || ns.indexOf('ii') !== -1) return true;
+      // The long-i sound is the core of "Rhyy". Standard German writes it
+      // "ie" / "ih" (rie, ihr) and the engine may also return a doubled "ii".
+      if (ns.indexOf('ie') !== -1 || ns.indexOf('ii') !== -1 || ns.indexOf('ih') !== -1) return true;
+      // A short token built around an "i"/"y" is almost certainly the attempt
+      if (ns.length <= 4 && /[iy]/.test(ns)) return true;
       return accepted.some(function (w) {
         // Accept within ~40% edit distance — the "r" in "Rhyy" is often misheard
         const tol = Math.max(1, Math.ceil(w.length * 0.4));
@@ -460,7 +468,9 @@
         fb.className = 'feedback correct';
         setTimeout(function () { navigateTo('lektion4.html'); }, 1400);
       } else {
-        fb.textContent = 'Versuich\'s nomol';
+        // Show what was heard so a near-miss feels responsive (helps on iOS)
+        const heard = (guesses && guesses[0]) ? guesses[0].trim() : '';
+        fb.textContent = heard ? 'Ghört: „' + heard + '" – nomol' : 'Versuich\'s nomol';
         fb.className = 'feedback wrong';
       }
     }
