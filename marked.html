@@ -80,7 +80,7 @@
       border-radius: 30px;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
-      filter: drop-shadow(0 4px 4px rgba(34, 132, 193, 0.25));
+      filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.12));
     }
 
     .uben-btn:active {
@@ -981,6 +981,14 @@
       ['list', 'exercise', 'results'].forEach(function (v) {
         document.getElementById(v + 'View').classList.toggle('active', v === name);
       });
+      // The bottom list hint is fixed-position, so hide it outside the list view.
+      // On the list view, show it again unless it was permanently dismissed.
+      const hintList = document.getElementById('hintList');
+      if (name === 'list') {
+        if (!localStorage.getItem('hintMarkedList')) hintList.classList.remove('dismissed');
+      } else {
+        hintList.classList.add('dismissed');
+      }
     }
 
     // ── List / storage ──

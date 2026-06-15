@@ -42,6 +42,7 @@ body.exiting {
   /* Lesson vowel highlight */
   --vowel:          #31B0E2;
   --vowel-alt:      #E8453C;
+  --soft-vowel:     #b91a12;  /* 50% opacity */
 
   --soft-cons:      #BE24E8;
 
