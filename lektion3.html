@@ -322,16 +322,22 @@
     let solved = false;
 
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognitionAPI) {
-      recognition = new SpeechRecognitionAPI();
-      recognition.lang = 'de-DE';   // standard German recognises the dialect sounds as e.g. "rii"
-      // "Rhyy" is a single short syllable, which engines easily cut off or miss.
-      // Keep listening (continuous) and test partial guesses as they stream in.
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.maxAlternatives = 5;
+    // iOS Safari ignores `continuous`/`interimResults` and breaks if a recognition
+    // object is reused after stopping — so we detect iOS and build a fresh, simple
+    // instance for every attempt.
+    const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-      recognition.onresult = function (e) {
+    function buildRecognition() {
+      const rec = new SpeechRecognitionAPI();
+      rec.lang = 'de-DE';   // standard German recognises the dialect sounds as e.g. "rii"
+      // "Rhyy" is a single short syllable, which engines easily cut off or miss.
+      // On iOS keep it simple; elsewhere stream partial guesses to catch it early.
+      rec.continuous = isIOS ? false : true;
+      rec.interimResults = isIOS ? false : true;
+      rec.maxAlternatives = 5;
+
+      rec.onresult = function (e) {
         // Gather every transcript (interim + final, all alternatives) since last event
         const guesses = [];
         let hasFinal = false;
@@ -341,31 +347,30 @@
           for (let i = 0; i < res.length; i++) guesses.push(res[i].transcript.trim());
         }
         // Accept as soon as anything matches — even a partial guess
-        if (guesses.some(matches)) {
+        if (guesses.some(matches) || hasFinal) {
           setListening(false);
-          try { recognition.stop(); } catch (_) {}
-          checkAnswer(guesses);
-        } else if (hasFinal) {
-          setListening(false);
-          try { recognition.stop(); } catch (_) {}
+          try { rec.stop(); } catch (_) {}
           checkAnswer(guesses);
         }
       };
-      recognition.onerror = function (e) {
+      rec.onerror = function (e) {
         setListening(false);
         const fb = document.getElementById('feedback');
         if (e.error === 'no-speech') {
           fb.textContent = 'Nüt ghört – nomol versueche';
         } else if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-          fb.textContent = 'Mikrofon isch blockiert – tipp s Wort';
+          fb.textContent = 'Mikrofon isch blockiert – i de Browser-Iistellige erlaube';
         } else if (e.error === 'audio-capture') {
-          fb.textContent = 'Kei Mikrofon gfunde – tipp s Wort';
+          fb.textContent = 'Kei Mikrofon gfunde';
+        } else if (e.error === 'aborted') {
+          return;   // user stopped / restarted — no message
         } else {
-          fb.textContent = 'Spracherkennig het nid klappt – nomol oder tippe';
+          fb.textContent = 'Spracherkennig het nid klappt – nomol versueche';
         }
         fb.className = 'feedback wrong';
       };
-      recognition.onend = function () { setListening(false); };
+      rec.onend = function () { setListening(false); };
+      return rec;
     }
 
     function setListening(val) {
@@ -380,20 +385,27 @@
     function startVoice() {
       if (solved) return;
       const fb = document.getElementById('feedback');
-      // Android/desktop Chrome only allow the mic on a secure (HTTPS) origin
+      // Mic needs a secure (HTTPS) origin on every browser, iOS Safari included
       if (!window.isSecureContext) {
         fb.textContent = 'Mikrofon bruucht HTTPS – App über https:// öffne';
         fb.className = 'feedback wrong';
         return;
       }
-      if (!recognition) {
-        fb.textContent = 'Dä Browser cha kei Spraach erkenne – nimm Chrome';
+      if (!SpeechRecognitionAPI) {
+        fb.textContent = 'Dä Browser cha kei Spraach erkenne – nimm Safari oder Chrome';
         fb.className = 'feedback wrong';
         return;
       }
-      if (isListening) { recognition.stop(); return; }
-      
+      // Tapping while listening stops the current attempt
+      if (isListening) {
+        try { recognition.stop(); } catch (_) {}
+        return;
+      }
+
+      fb.textContent = '';
       fb.className = 'feedback';
+      // Fresh instance each attempt — iOS Safari won't reliably restart a used one
+      recognition = buildRecognition();
       setListening(true);
       try {
         recognition.start();

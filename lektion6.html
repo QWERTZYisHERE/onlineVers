@@ -343,23 +343,41 @@
     let recognition = null;
 
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognitionAPI) {
-      recognition = new SpeechRecognitionAPI();
-      recognition.lang = 'de-DE';   // standard German recognises the dialect sounds, e.g. "drei scheenste dääge"
-      recognition.continuous = false;
-      recognition.interimResults = false;
-
-      recognition.onresult = function (e) {
-        const spoken = e.results[0][0].transcript.trim();
-        setListening(false);
-        checkAnswer(spoken);
-      };
-      recognition.onerror = function () { setListening(false); };
-      recognition.onend = function () { setListening(false); };
-    } else {
-      // No speech recognition (e.g. iOS Safari) → typed fallback
+    if (!SpeechRecognitionAPI) {
+      // No speech recognition at all → typed fallback
       document.getElementById('micBtn').style.display = 'none';
       document.getElementById('typeControls').style.display = 'flex';
+    }
+
+    function buildRecognition() {
+      const rec = new SpeechRecognitionAPI();
+      rec.lang = 'de-DE';   // standard German recognises the dialect sounds, e.g. "drei scheenste dääge"
+      rec.continuous = false;     // iOS Safari ignores continuous anyway
+      rec.interimResults = false;
+      rec.maxAlternatives = 5;
+
+      rec.onresult = function (e) {
+        // Test every alternative the engine returns
+        const guesses = [];
+        for (let i = 0; i < e.results[0].length; i++) guesses.push(e.results[0][i].transcript.trim());
+        setListening(false);
+        checkAnswer(guesses.find(checkable) || guesses[0] || '');
+      };
+      rec.onerror = function (e) {
+        setListening(false);
+        const fb = document.getElementById('feedback');
+        if (e.error === 'aborted') return;
+        if (e.error === 'no-speech') {
+          fb.textContent = 'Nüt ghört – nomol versueche';
+        } else if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+          fb.textContent = 'Mikrofon isch blockiert – i de Browser-Iistellige erlaube';
+        } else {
+          fb.textContent = 'Spracherkennig het nid klappt – nomol versueche';
+        }
+        fb.className = 'feedback wrong';
+      };
+      rec.onend = function () { setListening(false); };
+      return rec;
     }
 
     function setListening(val) {
@@ -373,20 +391,26 @@
 
     function startVoice() {
       const fb = document.getElementById('feedback');
-      // Android/desktop Chrome only allow the mic on a secure (HTTPS) origin
+      // Mic needs a secure (HTTPS) origin on every browser, iOS Safari included
       if (!window.isSecureContext) {
         fb.textContent = 'Mikrofon bruucht HTTPS – App über https:// öffne';
         fb.className = 'feedback wrong';
         return;
       }
-      if (!recognition) {
-        fb.textContent = 'Dä Browser cha kei Spraach erkenne – nimm Chrome';
+      if (!SpeechRecognitionAPI) {
+        fb.textContent = 'Dä Browser cha kei Spraach erkenne – tipp s Wort';
         fb.className = 'feedback wrong';
         return;
       }
-      if (isListening) { recognition.stop(); return; }
-      
+      if (isListening) {
+        try { recognition.stop(); } catch (_) {}
+        return;
+      }
+
+      fb.textContent = '';
       fb.className = 'feedback';
+      // Fresh instance each attempt — iOS Safari won't reliably restart a used one
+      recognition = buildRecognition();
       setListening(true);
       try {
         recognition.start();
@@ -426,6 +450,14 @@
     }
 
     const targetsNorm = targets.map(normalize);
+
+    // True if a transcript is close enough to any target (used to pick the best alternative)
+    function checkable(spoken) {
+      const ns = normalize(spoken);
+      return ns.length > 0 && targetsNorm.some(function (t) {
+        return levenshtein(ns, t) <= Math.ceil(t.length * 0.4);
+      });
+    }
 
     function checkAnswer(spoken) {
       const ns = normalize(spoken);

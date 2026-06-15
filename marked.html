@@ -719,14 +719,24 @@
 
     // ── Speech Recognition setup ──
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognitionAPI) {
-      recognition = new SpeechRecognitionAPI();
-      recognition.lang = 'de-CH';
-      recognition.continuous = false;
-      recognition.interimResults = false;
+    if (!SpeechRecognitionAPI) {
+      // No speech recognition at all → use the typed-answer fallback
+      document.getElementById('voiceControls').style.display = 'none';
+      document.getElementById('typeControls').style.display = 'flex';
+    }
 
-      recognition.onresult = function (e) {
-        const spoken = e.results[0][0].transcript.trim();
+    function buildRecognition() {
+      const rec = new SpeechRecognitionAPI();
+      rec.lang = 'de-DE';   // standard German — de-CH has no model on iOS Safari
+      rec.continuous = false;     // iOS Safari ignores continuous anyway
+      rec.interimResults = false;
+      rec.maxAlternatives = 5;
+
+      rec.onresult = function (e) {
+        // Pick the alternative that best matches the expected word, else the first
+        const guesses = [];
+        for (let i = 0; i < e.results[0].length; i++) guesses.push(e.results[0][i].transcript.trim());
+        const spoken = guesses.find(isCorrect) || guesses[0] || '';
         setListening(false);
         document.getElementById('spokenFeedback').textContent = '„' + spoken + '"';
         setTimeout(function () {
@@ -734,13 +744,9 @@
           checkAnswer(spoken);
         }, 700);
       };
-
-      recognition.onerror = function () { setListening(false); };
-      recognition.onend = function () { setListening(false); };
-    } else {
-      // No speech recognition (e.g. iOS Safari) → use the typed-answer fallback
-      document.getElementById('voiceControls').style.display = 'none';
-      document.getElementById('typeControls').style.display = 'flex';
+      rec.onerror = function () { setListening(false); };
+      rec.onend = function () { setListening(false); };
+      return rec;
     }
 
     function submitTyped(e) {
@@ -767,8 +773,13 @@
     buildVoiceBars(document.getElementById('micBtn'));
 
     function startVoice() {
-      if (!recognition || animating) return;
-      if (isListening) { recognition.stop(); return; }
+      if (!SpeechRecognitionAPI || animating) return;
+      if (isListening) {
+        try { recognition.stop(); } catch (_) {}
+        return;
+      }
+      // Fresh instance each attempt — iOS Safari won't reliably restart a used one
+      recognition = buildRecognition();
       setListening(true);
       try { recognition.start(); } catch (e) { setListening(false); }
     }
@@ -794,17 +805,22 @@
       return dp[m][n];
     }
 
-    function checkAnswer(spoken) {
+    function isCorrect(spoken) {
       const entry = exerciseWords[currentIndex];
+      if (!entry) return false;
       const ns = normalize(spoken);
-      const correct = entry.baseldeutsch.some(function (w) {
+      if (!ns) return false;
+      return entry.baseldeutsch.some(function (w) {
         const nw = normalize(w);
         if (ns === nw) return true;
         if (ns.includes(nw) || nw.includes(ns)) return true;
         if (Math.abs(ns.length - nw.length) <= 3 && levenshtein(ns, nw) <= 2) return true;
         return false;
       });
-      if (correct) handleCorrect();
+    }
+
+    function checkAnswer(spoken) {
+      if (isCorrect(spoken)) handleCorrect();
       else handleWrong();
     }
 

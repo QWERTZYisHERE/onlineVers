@@ -91,7 +91,7 @@
       border-width: 4px;
       border-style: solid;
       border-color: var(--border);
-      background: transparent;
+      background: white;
       color: var(--text);
       font-family: "Manrope", sans-serif;
       font-size: calc(14px * var(--font-scale));
@@ -368,6 +368,9 @@
   <div class="hint-box" id="hint">Hier kannst du Wörter suchen!<button class="hint-close"
       aria-label="Schliessen"></button></div>
 
+  <div class="hint-box dismissed" id="hintDetail">Hier kannst du die Wörter markieren und das Dialektwort
+    anschauen.<button class="hint-close" aria-label="Schliessen"></button></div>
+
   <nav class="bottom-nav">
     <button class="nav-btn" onclick="navigateTo('index.html')" aria-label="Home"><svg class="nav-icon"
         viewBox="0 0 31 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -616,12 +619,20 @@
       document.getElementById('wordList').style.display = 'none';
       document.querySelectorAll('.search-container, .filter-row').forEach(el => el.style.display = 'none');
       view.classList.add('visible');
+      document.getElementById('hint').classList.add('dismissed');
+      if (!localStorage.getItem('hintLexikonDetail')) {
+        document.getElementById('hintDetail').classList.remove('dismissed');
+      }
     }
 
     function closeDetail() {
       document.getElementById('detailView').classList.remove('visible');
       document.getElementById('wordList').style.display = 'grid';
       document.querySelectorAll('.search-container, .filter-row').forEach(el => el.style.display = '');
+      document.getElementById('hintDetail').classList.add('dismissed');
+      if (!localStorage.getItem('hintLexikon')) {
+        document.getElementById('hint').classList.remove('dismissed');
+      }
     }
 
     function handleDetailBackdropClick(e) {
@@ -646,6 +657,7 @@
     });
 
     setupHint('hint', 'hintLexikon');
+    setupHint('hintDetail', 'hintLexikonDetail');
   </script>
 
 </body>
