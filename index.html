@@ -314,12 +314,13 @@
             font-size: 42px;
             font-weight: 800;
             color: var(--text);
-            padding: 44px 30px 14px;
+            padding: 14px 30px 14px;
             flex-shrink: 0;
             max-height: 170px;
             overflow: hidden;
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease,
                 max-height 0.4s ease, padding 0.4s ease;
+            line-height: 45px;
         }
 
         /* Hide the title (and collapse its space) while the map is zoomed in */
@@ -340,8 +341,8 @@
         <div class="intro-content">
             <img class="intro-image" src="image.png" alt="Basel am Rhein">
             <p class="intro-text">
-                Basel ist die Stadt der Museen, aber auch bekannt für ihre lebendige Kulturszene. Nicht nur das,
-                aber wie man in der Schweiz so kennt, hat es eine eigene Dialektsprache:
+               Basel ist die Stadt der Museen und zugleich bekannt für eine lebendige Kulturszene. 
+               Typisch schweizerisch hat die Stadt zudem ihre ganz eigene Dialektsprache:
                 <br><span class="intro-highlight">Baseldeutsch</span>
             </p>
             <button class="intro-next" onclick="dismissIntro()">Weiter</button>
