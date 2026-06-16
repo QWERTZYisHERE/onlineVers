@@ -220,6 +220,28 @@
       align-items: flex-start;
       justify-content: space-between;
       flex-shrink: 0;
+      position: relative;
+    }
+
+    /* Arrow nudging the user toward the bookmark icon (shown with the hint) */
+    .bk-arrow {
+      position: absolute;
+      top: 46px;
+      right: 8px;
+      width: 34px;
+      height: 46px;
+      pointer-events: none;
+      z-index: 21;
+      animation: bkArrowBounce 0.9s ease-in-out infinite;
+    }
+
+    .bk-arrow.hidden {
+      display: none;
+    }
+
+    @keyframes bkArrowBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
     }
 
     .detail-german {
@@ -597,6 +619,11 @@
       localStorage.setItem('markedWords', JSON.stringify(words));
       const btn = document.getElementById('markBtn');
       if (btn) btn.classList.toggle('marked', i < 0);   // i<0 → was just added
+      // Once the user has used the bookmark, retire the hint + guiding arrow
+      const arrow = document.getElementById('bkArrow');
+      if (arrow) arrow.classList.add('hidden');
+      document.getElementById('hintDetail').classList.add('dismissed');
+      localStorage.setItem('hintLexikonDetail', '1');
     }
 
     function openDetail(index) {
@@ -610,6 +637,7 @@
           <button class="bookmark-btn${marked ? ' marked' : ''}" id="markBtn" onclick="toggleMark(${index}); event.stopPropagation();" aria-label="Speichern">
             <svg class="bk-icon" viewBox="0 0 15 21" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 5.04201V15.5403C1.5 17.0467 1.5 17.7998 1.70412 18.2607C2.08245 19.1151 2.91157 19.606 3.76367 19.4806C4.2234 19.4129 4.78964 18.9951 5.9221 18.1594L5.92481 18.1574C6.37368 17.8262 6.59815 17.6606 6.83295 17.5687C7.26421 17.4 7.73476 17.4 8.16602 17.5687C8.40129 17.6608 8.62664 17.8271 9.07732 18.1596C10.2098 18.9952 10.7767 19.4127 11.2364 19.4804C12.0885 19.6059 12.9176 19.1151 13.2959 18.2607C13.5 17.7998 13.5 17.0465 13.5 15.5403V5.03837C13.5 3.80105 13.5 3.18147 13.2822 2.70841C13.0905 2.29189 12.7837 1.9535 12.4074 1.74127C11.9796 1.5 11.4203 1.5 10.3002 1.5H4.7002C3.58009 1.5 3.01962 1.5 2.5918 1.74127C2.21547 1.9535 1.90973 2.29189 1.71799 2.70841C1.5 3.18193 1.5 3.80227 1.5 5.04201Z" fill="#F77B4F" stroke="#303348" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
+          <svg class="bk-arrow hidden" id="bkArrow" viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M30 74 V20 M30 20 L14 36 M30 20 L46 36" stroke="var(--accent-light)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" /></svg>
         </div>` +
         entry.baseldeutsch.map(word => `
         <div class="detail-card">
@@ -622,6 +650,7 @@
       document.getElementById('hint').classList.add('dismissed');
       if (!localStorage.getItem('hintLexikonDetail')) {
         document.getElementById('hintDetail').classList.remove('dismissed');
+        document.getElementById('bkArrow').classList.remove('hidden');
       }
     }
 
@@ -658,6 +687,12 @@
 
     setupHint('hint', 'hintLexikon');
     setupHint('hintDetail', 'hintLexikonDetail');
+
+    // Dismissing the detail hint via its × should also retire the guiding arrow
+    document.querySelector('#hintDetail .hint-close').addEventListener('click', function () {
+      const arrow = document.getElementById('bkArrow');
+      if (arrow) arrow.classList.add('hidden');
+    });
   </script>
 
 </body>

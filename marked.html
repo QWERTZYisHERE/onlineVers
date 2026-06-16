@@ -75,7 +75,7 @@
       background: var(--accent-light);
       border: solid var(--border-nav);
       border-width: 5px;
-      padding: 12px 250px 12px 12px;
+      padding: 12px 67% 12px 12px;
       gap: 12px;
       border-radius: 30px;
       cursor: pointer;
@@ -744,7 +744,20 @@
           checkAnswer(spoken);
         }, 700);
       };
-      rec.onerror = function () { setListening(false); };
+      rec.onerror = function (e) {
+        setListening(false);
+        const fb = document.getElementById('spokenFeedback');
+        if (e.error === 'aborted') return;   // user stopped / restarted — stay quiet
+        if (e.error === 'no-speech') {
+          fb.textContent = 'Nüt ghört – nomol versueche';
+        } else if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+          fb.textContent = 'Mikrofon isch blockiert – i de Browser-Iistellige erlaube';
+        } else if (e.error === 'audio-capture') {
+          fb.textContent = 'Kei Mikrofon gfunde';
+        } else {
+          fb.textContent = 'Spracherkennig het nid klappt – nomol versueche';
+        }
+      };
       rec.onend = function () { setListening(false); };
       return rec;
     }
@@ -773,15 +786,31 @@
     buildVoiceBars(document.getElementById('micBtn'));
 
     function startVoice() {
-      if (!SpeechRecognitionAPI || animating) return;
+      if (animating) return;
+      const fb = document.getElementById('spokenFeedback');
+      // Mic needs a secure (HTTPS) origin on every browser, iOS Safari included
+      if (!window.isSecureContext) {
+        fb.textContent = 'Mikrofon bruucht HTTPS – App über https:// öffne';
+        return;
+      }
+      if (!SpeechRecognitionAPI) {
+        fb.textContent = 'Dä Browser cha kei Spraach erkenne – tipp s Wort';
+        return;
+      }
       if (isListening) {
         try { recognition.stop(); } catch (_) {}
         return;
       }
+      fb.textContent = '';
       // Fresh instance each attempt — iOS Safari won't reliably restart a used one
       recognition = buildRecognition();
       setListening(true);
-      try { recognition.start(); } catch (e) { setListening(false); }
+      try {
+        recognition.start();
+      } catch (e) {
+        setListening(false);
+        fb.textContent = 'Het nid gstartet – nomol versueche';
+      }
     }
 
     // ── Answer matching ──

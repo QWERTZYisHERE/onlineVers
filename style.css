@@ -135,7 +135,7 @@ body.exiting {
    Voice (microphone) button with waveform
    ───────────────────────────────────────── */
 .voice-btn {
-  --voice-bg:     #6AA876;   /* muted when idle */
+  --voice-bg:     #93a296;   /* muted when idle */
   --voice-border: #0C2B12;
   border: solid var(--border-nav);
   border-width: 5px;
