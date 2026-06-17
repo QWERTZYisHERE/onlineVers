@@ -49,21 +49,21 @@
     }
 
     .info-btn {
-      width: 46px;
       height: 46px;
-      border-radius: 50%;
+      padding: 0 18px;
+      border-radius: 23px;
       background: var(--accent-light);
       border: solid var(--border-nav);
       border-width: 4px;
       color: #fff;
-      font-family: Georgia, "Times New Roman", serif;
-      font-style: italic;
-      font-size: 24px;
-      font-weight: 700;
+      font-family: "Manrope", sans-serif;
+      font-size: calc(16px * var(--font-scale));
+      font-weight: 800;
+      white-space: nowrap;
       cursor: pointer;
       flex-shrink: 0;
       -webkit-tap-highlight-color: transparent;
-      filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.12));
+      filter: drop-shadow(0 4px 4px rgba(34, 132, 193, 0.25));
     }
 
     .info-btn:active {
@@ -251,7 +251,7 @@
 <body>
 
   <div class="lesson-top">
-    <button class="info-btn" id="infoBtn" onclick="toggleInfo(event)">i</button>
+    <button class="info-btn" id="infoBtn" onclick="toggleInfo(event)">Erklärung</button>
     <button class="close-btn" onclick="navigateTo('index.html')" aria-label="Schliessen">
       <svg viewBox="0 0 41 45" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M3.5 37.5L20.2119 20.5M37.5 3.5L20.2119 20.5M20.2119 20.5L3.5 3.5M20.2119 20.5L37.5 37.5" stroke="#A29595" stroke-width="7"

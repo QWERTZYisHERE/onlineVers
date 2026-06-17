@@ -315,154 +315,122 @@
 
   <script src="script.js"></script>
   <script>
-    // Accepted pronunciations of the Baseldeutsch "Rhyy" (/riː/).
-    // The German recogniser usually autocorrects this single syllable to a real
-    // long-i word — these are the ones it most often returns.
-    const accepted = [
-      'rii', 'nii', 'mii', 'lie', 'rhii', 'rie', 'ri', 'reh', 'ree', 'rhi', 'rhie',
-      'wie', 'sie', 'die', 'hier', 'vier', 'bier', 'ihr', 'ihn', 'ihm', 'wir', 'mir', 'dir',
-      'rhein', 'rein', 'reihe', 'reih', 'rhy', 'rhyy', 'y'
-    ];
-    let isListening = false;
-    let recognition = null;
+    // ── Speak-to-pass via microphone level ──────────────────────────────
+    // "Rhyy" is a single short syllable that browser speech engines can't
+    // reliably transcribe (and the engine fights the waveform visualiser for
+    // the mic). Since any spoken attempt should pass, we instead listen to the
+    // raw microphone volume from one audio stream — robust, offline, and works
+    // on iOS Safari. The user passes simply by saying the word out loud.
+    const micBtn = document.getElementById('micBtn');
+    buildVoiceBars(micBtn);
+
+    let listening = false;
     let solved = false;
+    let stream = null;
+    let audioCtx = null;
+    let raf = 0;
 
-    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    // iOS Safari ignores `continuous`/`interimResults` and breaks if a recognition
-    // object is reused after stopping — so we detect iOS and build a fresh, simple
-    // instance for every attempt.
-    const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
-      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-    function buildRecognition() {
-      const rec = new SpeechRecognitionAPI();
-      rec.lang = 'de-DE';   // standard German recognises the dialect sounds as e.g. "rii"
-      // "Rhyy" is a single short syllable, which engines easily cut off or miss.
-      // On iOS keep it simple; elsewhere stream partial guesses to catch it early.
-      rec.continuous = isIOS ? false : true;
-      rec.interimResults = isIOS ? false : true;
-      rec.maxAlternatives = 5;
-
-      rec.onresult = function (e) {
-        // Gather every transcript (interim + final, all alternatives) since last event
-        const guesses = [];
-        let hasFinal = false;
-        for (let r = e.resultIndex; r < e.results.length; r++) {
-          const res = e.results[r];
-          if (res.isFinal) hasFinal = true;
-          for (let i = 0; i < res.length; i++) guesses.push(res[i].transcript.trim());
-        }
-        // Accept as soon as anything matches — even a partial guess
-        if (guesses.some(matches) || hasFinal) {
-          setListening(false);
-          try { rec.stop(); } catch (_) {}
-          checkAnswer(guesses);
-        }
-      };
-      rec.onerror = function (e) {
-        setListening(false);
-        const fb = document.getElementById('feedback');
-        if (e.error === 'no-speech') {
-          fb.textContent = 'Nüt ghört – nomol versueche';
-        } else if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-          fb.textContent = 'Mikrofon isch blockiert – i de Browser-Iistellige erlaube';
-        } else if (e.error === 'audio-capture') {
-          fb.textContent = 'Kei Mikrofon gfunde';
-        } else if (e.error === 'aborted') {
-          return;   // user stopped / restarted — no message
-        } else {
-          fb.textContent = 'Spracherkennig het nid klappt – nomol versueche';
-        }
-        fb.className = 'feedback wrong';
-      };
-      rec.onend = function () { setListening(false); };
-      return rec;
+    function stopListening() {
+      listening = false;
+      micBtn.classList.remove('active');
+      if (raf) { cancelAnimationFrame(raf); raf = 0; }
+      micBtn.querySelectorAll('.bars span').forEach(function (b) { b.style.height = ''; });
+      if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
+      if (audioCtx) { try { audioCtx.close(); } catch (_) {} audioCtx = null; }
     }
 
-    function setListening(val) {
-      isListening = val;
-      const btn = document.getElementById('micBtn');
-      if (val) startVoiceViz(btn);
-      else stopVoiceViz(btn);
+    function succeed() {
+      if (solved) return;
+      solved = true;
+      stopListening();
+      const fb = document.getElementById('feedback');
+      fb.textContent = 'Richtig! 🎉';
+      fb.className = 'feedback correct';
+      setTimeout(function () { navigateTo('lektion4.html'); }, 1400);
     }
-
-    buildVoiceBars(document.getElementById('micBtn'));
 
     function startVoice() {
       if (solved) return;
       const fb = document.getElementById('feedback');
+      if (listening) { stopListening(); fb.textContent = ''; fb.className = 'feedback'; return; }
       // Mic needs a secure (HTTPS) origin on every browser, iOS Safari included
       if (!window.isSecureContext) {
         fb.textContent = 'Mikrofon bruucht HTTPS – App über https:// öffne';
         fb.className = 'feedback wrong';
         return;
       }
-      if (!SpeechRecognitionAPI) {
-        fb.textContent = 'Dä Browser cha kei Spraach erkenne – nimm Safari oder Chrome';
+      if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+        fb.textContent = 'Dä Browser cha kei Mikrofon – nimm Safari oder Chrome';
         fb.className = 'feedback wrong';
-        return;
-      }
-      // Tapping while listening stops the current attempt
-      if (isListening) {
-        try { recognition.stop(); } catch (_) {}
         return;
       }
 
       fb.textContent = '';
       fb.className = 'feedback';
-      // Fresh instance each attempt — iOS Safari won't reliably restart a used one
-      recognition = buildRecognition();
-      setListening(true);
-      try {
-        recognition.start();
-      } catch (e) {
-        setListening(false);
-        fb.textContent = 'Het nid gstartet – nomol versueche';
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(function (s) {
+        stream = s;
+        listening = true;
+        micBtn.classList.add('active');
+
+        const AC = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AC();
+        const src = audioCtx.createMediaStreamSource(stream);
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.6;
+        src.connect(analyser);
+        const freq = new Uint8Array(analyser.frequencyBinCount);
+        const time = new Uint8Array(analyser.fftSize);
+        const bars = micBtn.querySelectorAll('.bars span');
+        const MIN = 10, MAX = 56;
+        const RECORD_MS = 1500;   // keep recording a moment after speech is heard
+        let loudFrames = 0;
+        let spokeAt = 0;          // timestamp speech was first detected
+        const startTime = Date.now();
+
+        function frame() {
+          analyser.getByteFrequencyData(freq);
+          analyser.getByteTimeDomainData(time);
+
+          // Drive the waveform bars from the live spectrum
+          for (let i = 0; i < bars.length; i++) {
+            const v = freq[i * 3 + 2] || 0;
+            bars[i].style.height = (MIN + (v / 255) * (MAX - MIN)) + 'px';
+          }
+
+          // Detect speech via RMS loudness (quiet room ≈ 0.01–0.02)
+          let sumSq = 0;
+          for (let i = 0; i < time.length; i++) {
+            const x = (time[i] - 128) / 128;
+            sumSq += x * x;
+          }
+          const rms = Math.sqrt(sumSq / time.length);
+          if (rms > 0.07) loudFrames++; else loudFrames = Math.max(0, loudFrames - 1);
+
+          // First time we hear sustained sound: start the short recording window
+          if (!spokeAt && loudFrames >= 5) {
+            spokeAt = Date.now();
+            const fb2 = document.getElementById('feedback');
+            fb2.textContent = 'Uufnahme…';
+            fb2.className = 'feedback';
+          }
+
+          // Once the recording window has elapsed, give feedback
+          if (spokeAt && Date.now() - spokeAt >= RECORD_MS) { succeed(); return; }
+          if (!spokeAt && Date.now() - startTime > 7000) {   // gave up, no speech
+            const fb2 = document.getElementById('feedback');
+            fb2.textContent = 'Nüt ghört – nomol versueche';
+            fb2.className = 'feedback wrong';
+            stopListening();
+            return;
+          }
+          raf = requestAnimationFrame(frame);
+        }
+        raf = requestAnimationFrame(frame);
+      }).catch(function () {
+        fb.textContent = 'Mikrofon isch blockiert – i de Browser-Iistellige erlaube';
         fb.className = 'feedback wrong';
-      }
-    }
-
-    function normalize(str) {
-      return str.toLowerCase()
-        .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue')
-        .replace(/[^a-z]/g, '');
-    }
-
-    function levenshtein(a, b) {
-      const m = a.length, n = b.length;
-      if (!m) return n;
-      if (!n) return m;
-      const dp = Array.from({ length: m + 1 }, function (_, i) { return [i]; });
-      for (let j = 0; j <= n; j++) dp[0][j] = j;
-      for (let i = 1; i <= m; i++)
-        for (let j = 1; j <= n; j++)
-          dp[i][j] = a[i - 1] === b[j - 1]
-            ? dp[i - 1][j - 1]
-            : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
-      return dp[m][n];
-    }
-
-    function matches(guess) {
-      // "Rhyy" is a single short syllable the engine struggles to transcribe,
-      // so we accept any non-empty utterance as a correct attempt.
-      return normalize(guess).length > 0;
-    }
-
-    function checkAnswer(guesses) {
-      if (solved) return;
-      const fb = document.getElementById('feedback');
-      const ok = guesses.some(matches);
-      if (ok) {
-        solved = true;
-        fb.textContent = 'Richtig! 🎉';
-        fb.className = 'feedback correct';
-        setTimeout(function () { navigateTo('lektion4.html'); }, 1400);
-      } else {
-        // Show what was heard so a near-miss feels responsive (helps on iOS)
-        const heard = (guesses && guesses[0]) ? guesses[0].trim() : '';
-        fb.textContent = heard ? 'Ghört: „' + heard + '" – nomol' : 'Versuich\'s nomol';
-        fb.className = 'feedback wrong';
-      }
+      });
     }
 
     function toggleInfo(e) {

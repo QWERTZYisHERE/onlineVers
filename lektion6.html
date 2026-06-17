@@ -414,6 +414,7 @@
       setListening(true);
       try {
         recognition.start();
+        fb.textContent = 'Uufnahme…';
       } catch (e) {
         setListening(false);
         fb.textContent = 'Het nid gstartet – nomol versueche';
