@@ -171,6 +171,9 @@
       });
     }
 
+    // Finishing the lessons completes level 1 → unlocks level 2 on the map
+    localStorage.setItem('level1Complete', '1');
+
     animateTitle('Glückwunsch!');
     celebrate();
   </script>

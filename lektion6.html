@@ -492,7 +492,7 @@
       { x: 'd' }, { x: 'r' }, { x: 'e' }, { x: 'y' }, { space: true },
       { x: 'sch' }, { x: 'ee', t: 'lv', c: 'var(--vowel)' }, { x: 'nste' }, { br: true },
       { x: 'D', t: 'dl', c: 'var(--soft-cons)' }, { x: 'ää', t: 'lv', c: 'var(--vowel)' },
-      { x: 'g', c: 'var(--vowel-alt)' }, { x: 'e' }
+      { x: 'g', c: 'var(--vowel-alt)' }
     ];
 
     const SW_FRAMES = {
@@ -532,8 +532,12 @@
 
     let swGen = 0;
 
+    // Dialect-phrase recording, played when the typography animation starts
+    const dialektAudio = new Audio('audio/Fasnacht.mp3');
+
     async function playWord() {
       const gen = ++swGen;
+      try { dialektAudio.currentTime = 0; dialektAudio.play().catch(function () {}); } catch (e) {}
       const letters = Array.from(document.getElementById('scaleWord').children);
       letters.forEach(function (s) {
         s.getAnimations().forEach(function (a) { a.cancel(); });

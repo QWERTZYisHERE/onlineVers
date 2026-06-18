@@ -207,6 +207,11 @@
             fill: #303348;
         }
 
+        /* Level 2 unlocked → its bubble turns orange like level 1 */
+        #bubble2.unlocked path[fill="#C19C8F"] {
+            fill: var(--accent-light);
+        }
+
         /* ── First-time intro overlay ── */
         .intro-overlay {
             position: fixed;
@@ -349,7 +354,7 @@
         <div class="intro-content">
             <img class="intro-image" src="image.png" alt="Basel am Rhein">
             <p class="intro-text">
-               Basel ist die Stadt der Museen und zugleich bekannt für eine lebendige Kulturszene. 
+               Basel ist die Stadt der Museen und zugleich bekannt für eine lebendige Kulturszene. <br>
                Typisch schweizerisch hat die Stadt zudem ihre ganz eigene Dialektsprache:
                 <br><span class="intro-highlight">Baseldeutsch</span>
             </p>
@@ -501,7 +506,7 @@
         <path d="M282.539 268.524V330.707M282.539 268.524V281.707M282.539 268.524V219.524M282.539 281.707V330.707L265.955 327.225L246.162 333.692V347.124L170.733 445.125L148.799 441.145V397.866L143.45 388.414H131.68V376.972L123.121 382.444L118.307 371.997V322.997L123.719 313.625L133.82 296.134L126.331 289.169L137.03 270.266M196.5 85.2073L200.5 71.2782H210.854C223.693 70.2832 252.688 69.9847 265.955 76.7503L288.846 60.3503L299.644 71.2782L273.73 95.8265L282.539 119.311L288.846 116.05L303.423 134.8L317.459 125.307L335.5 146.396V195.396L326.941 211.315C322.483 209.159 310.036 206.838 295.913 214.797L282.539 219.524M126.331 85.2073C126.954 73.8169 128.882 54.2112 132.579 36.125C135.234 23.1417 138.8 10.9413 143.45 3.125L206.04 28.4959V49.3896L210.854 56.3541V71.2782M335.5 146.396L326.941 162.315C322.483 160.159 310.036 157.838 295.913 165.797L262.211 176.244M262.211 176.244V187.125M262.211 176.244L242.5 180.625M282.539 219.524L262.211 201.615V187.125M282.539 219.524V281.707M282.539 281.707L265.955 278.225M118.307 322.997L123.121 333.444L126.331 331.392L131.68 327.972V339.414H143.45L148.799 348.866V370.505V392.145L170.733 396.125L211.525 343.125L246.162 298.124V284.692L265.955 278.225M265.955 278.225L256 268.524V260.316H265.955L246.162 211.315H207M137.03 270.266L118.307 260.316M137.03 270.266L207 306.331M118.307 260.316L46.622 249.372L12.3846 257.331M101.5 211.125L129 235.625L128.134 237.625L118.307 260.316M123.719 313.625L118.307 309.316L46.622 298.372L12.3846 306.331V257.331L25.2236 215.047H32.713L34.5404 211.125M46.622 185.198L34.5404 211.125M46.622 185.198L25.2236 165.05L6.5 146.396M46.622 185.198H95M34.5404 211.125L6.5 195.396V146.396L16.1293 140.924L25.2236 116.05M25.2236 116.05L16.1293 103.614L46.622 82.2225L53.5764 71.2782L88.8837 82.2225L104.398 76.7503L126.331 85.2073M25.2236 116.05L91.5 162.315M126.331 85.2073V131.625M34.5404 211.125H101.5M91.5 162.315L126.331 131.625M91.5 162.315L95 185.198M126.331 131.625L123.719 146.396L118.307 160.125V195.396L131.68 201.615L141.535 235.625M126.331 131.625C126.331 131.625 136.248 171.532 152 185.198C167.752 198.865 207 201.615 207 201.615M95 185.198L101.5 211.125M143.817 243.498L159.5 249.372L162.5 243.125L168 249.372L165.5 257.331L189 263.625V273.125L207 306.331L211.525 343.125M128.134 237.625L143.817 243.498M143.817 243.498L141.535 235.625M207 211.315V201.615M207 211.315L205 217.125L173 225.125L158 239.625L141.535 235.625M207 201.615C207 201.615 224.219 199.954 235 197.125C245.781 194.296 262.211 187.125 262.211 187.125M132.579 36.125L141.535 39.7337M178.5 85.2073L165.5 49.3896L141.535 39.7337M178.5 85.2073H196.5M178.5 85.2073L182.255 103.87M196.5 85.2073L223.36 140.924M242.5 180.625L223.36 140.924M147.183 157.125C147.909 158.882 148.681 160.614 149.5 162.315C156.942 177.773 168.999 185.277 182 188.313C210.051 194.865 242.5 180.625 242.5 180.625M147.183 157.125C141.505 143.39 138.583 128.058 137.312 113.125C134.079 75.1405 141.535 39.7337 141.535 39.7337M223.36 140.924L194.015 162.315M159.5 149.625L162.5 157.125L168 153.625L178.5 173.625L185 180.625L182 188.313M178.5 173.625L194.015 162.315M188.746 136.125L159.5 149.625L147.183 157.125M194.015 162.315L188.746 136.125M183.5 103.614L182.255 103.87M137.312 113.125L182.255 103.87M188.746 136.125L182.255 103.87" stroke="#303348" stroke-width="5"/>
         <g id="marker1" filter="url(#filter1_d_788_149)" onclick="toggleMarker(event)" style="cursor:pointer">
         <circle id="circle1" cx="146" cy="181.625" r="18.5" transform="rotate(-90 146 181.625)" fill="#F77B4F" stroke="#303348" stroke-width="5"/>
-        <path d="M145.505 190.125V174.637L142.036 176.749V173.766L145.505 171.693H148.231V190.125H145.505Z" fill="white"/>
+        <text x="146" y="181.625" text-anchor="middle" dominant-baseline="central" font-family="Manrope, sans-serif" font-weight="800" font-size="24" fill="white">1</text>
         </g>
         <g id="marker2" onclick="toggleLock(event,'marker2')" style="cursor:pointer">
         <circle cx="150" cy="78.625" r="18.5" transform="rotate(-90 150 78.625)" fill="white" stroke="#303348" stroke-width="5"/>
@@ -593,6 +598,22 @@
             marker4: { cx: 81, cy: 233.625, bubble: 'bubble4' }
         };
         let activePin = null;
+
+        // Reflect progress: once level 1 is done, the top-left pin becomes an
+        // unlocked orange "2" pin and its bubble turns orange.
+        function applyProgress() {
+            if (!localStorage.getItem('level1Complete')) return;
+            const g = document.getElementById('marker2');
+            if (g) {
+                g.innerHTML =
+                    '<circle cx="150" cy="78.625" r="18.5" style="fill: var(--map-extrude)" stroke="#303348" stroke-width="5"/>' +
+                    '<text x="150" y="78.625" text-anchor="middle" dominant-baseline="central" ' +
+                    'font-family="Manrope, sans-serif" font-weight="800" font-size="24" fill="white">2</text>';
+            }
+            const b = document.getElementById('bubble2');
+            if (b) b.classList.add('unlocked');
+        }
+        applyProgress();
 
         // Lesson 1 pin (unlocked): zoom in, then open the lesson on a second tap
         function toggleMarker(event) {

@@ -269,6 +269,12 @@
     const mwDialekt = document.querySelector('.mw-dialekt');
     let wHoch = 0, wDialekt = 0;
 
+    // Dialect-word recording, played when the word morphs to Baseldeutsch
+    const dialektAudio = new Audio('audio/Nebel.mp3');
+    function playDialektAudio() {
+      try { dialektAudio.currentTime = 0; dialektAudio.play().catch(function () {}); } catch (e) {}
+    }
+
     // Measure each vowel's natural width so the slot can animate between them,
     // letting "N" and "bel" slide together as the spelling changes.
     function measure() {
@@ -282,6 +288,7 @@
       showingDialekt = toDialekt;
       morphWord.classList.toggle('dialekt', toDialekt);
       mwMorph.style.width = (toDialekt ? wDialekt : wHoch) + 'px';
+      if (toDialekt) playDialektAudio();
     }
 
     function toggleWord() {
