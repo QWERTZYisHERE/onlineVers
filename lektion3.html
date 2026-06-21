@@ -308,7 +308,7 @@
 
     <div class="word">Rh<span class="v"><span>yy</span></span></div>
 
-    <div class="feedback" id="feedback"></div>
+    <div class="feedback" id="feedback">Drücke auf die Aufnahmetaste und sprich es aus</div>
 
     <button class="voice-btn" id="micBtn" onclick="startVoice()" aria-label="Sprechen"></button>
   </div>
@@ -344,7 +344,7 @@
       solved = true;
       stopListening();
       const fb = document.getElementById('feedback');
-      fb.textContent = 'Richtig! 🎉';
+      fb.textContent = 'Richtig!';
       fb.className = 'feedback correct';
       setTimeout(function () { navigateTo('lektion4.html'); }, 1400);
     }
