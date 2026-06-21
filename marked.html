@@ -294,17 +294,18 @@
     }
 
     .card-word {
-      font-size: 38px;
+      font-size: 40px;
       font-weight: 800;
       color: var(--text);
+      line-height: 1;
       text-align: center;
       padding: 0 24px;
     }
 
     .spoken-feedback {
-      height: 22px;
-      font-size: calc(14px * var(--font-scale));
-      font-weight: 500;
+      min-height: 24px;
+      font-size: calc(18px * var(--font-scale));
+      font-weight: 700;
       color: var(--text-muted);
       text-align: center;
       padding: 0 30px;
@@ -739,11 +740,8 @@
         for (let i = 0; i < e.results[0].length; i++) guesses.push(e.results[0][i].transcript.trim());
         const spoken = guesses.find(isCorrect) || guesses[0] || '';
         setListening(false);
-        document.getElementById('spokenFeedback').textContent = '„' + spoken + '"';
-        setTimeout(function () {
-          document.getElementById('spokenFeedback').textContent = '';
-          checkAnswer(spoken);
-        }, 700);
+        document.getElementById('spokenFeedback').textContent = '';
+        checkAnswer(spoken);
       };
       rec.onerror = function (e) {
         setListening(false);
@@ -770,11 +768,8 @@
       const val = input.value.trim();
       if (!val) return;
       input.value = '';
-      document.getElementById('spokenFeedback').textContent = '„' + val + '"';
-      setTimeout(function () {
-        document.getElementById('spokenFeedback').textContent = '';
-        checkAnswer(val);
-      }, 500);
+      document.getElementById('spokenFeedback').textContent = '';
+      checkAnswer(val);
     }
 
     function setListening(val) {
@@ -836,16 +831,63 @@
       return dp[m][n];
     }
 
+    // Kölner Phonetik: encodes a German word by how it SOUNDS, so the
+    // recogniser's standard-German transcription can be matched against the
+    // dialect spelling (e.g. "Tag" and "Daag" both code to "24").
+    function koelner(str) {
+      const s = str.toLowerCase()
+        .replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ß/g, 'ss')
+        .replace(/[^a-z]/g, '');
+      if (!s) return '';
+      let codes = '';
+      for (let i = 0; i < s.length; i++) {
+        const c = s[i], prev = s[i - 1], next = s[i + 1] || '';
+        let code = '';
+        switch (c) {
+          case 'a': case 'e': case 'i': case 'j': case 'o': case 'u': case 'y': code = '0'; break;
+          case 'h': code = ''; break;
+          case 'b': code = '1'; break;
+          case 'p': code = (next === 'h') ? '3' : '1'; break;
+          case 'd': case 't': code = ('csz'.indexOf(next) >= 0) ? '8' : '2'; break;
+          case 'f': case 'v': case 'w': code = '3'; break;
+          case 'g': case 'k': case 'q': code = '4'; break;
+          case 'c':
+            if (i === 0) code = ('ahkloqrux'.indexOf(next) >= 0) ? '4' : '8';
+            else if ('sz'.indexOf(prev) >= 0) code = '8';
+            else code = ('ahkoqux'.indexOf(next) >= 0) ? '4' : '8';
+            break;
+          case 'x': code = ('ckq'.indexOf(prev) >= 0) ? '8' : '48'; break;
+          case 'l': code = '5'; break;
+          case 'm': case 'n': code = '6'; break;
+          case 'r': code = '7'; break;
+          case 's': case 'z': code = '8'; break;
+        }
+        codes += code;
+      }
+      // Collapse repeated digits, then drop all '0' except a leading one
+      let dedup = '';
+      for (let k = 0; k < codes.length; k++) if (codes[k] !== codes[k - 1]) dedup += codes[k];
+      let out = dedup[0] === '0' ? '0' : '';
+      for (let m = 0; m < dedup.length; m++) if (dedup[m] !== '0') out += dedup[m];
+      return out;
+    }
+
     function isCorrect(spoken) {
       const entry = exerciseWords[currentIndex];
       if (!entry) return false;
       const ns = normalize(spoken);
       if (!ns) return false;
+      const ks = koelner(spoken);
       return entry.baseldeutsch.some(function (w) {
         const nw = normalize(w);
         if (ns === nw) return true;
         if (ns.includes(nw) || nw.includes(ns)) return true;
-        if (Math.abs(ns.length - nw.length) <= 3 && levenshtein(ns, nw) <= 2) return true;
+        // Sounds the same (or almost): the most reliable test for dialect words
+        const kw = koelner(w);
+        if (ks && kw && (ks === kw || levenshtein(ks, kw) <= 1)) return true;
+        // Lenient spelling distance — accept up to ~45% of the longer word
+        const tol = Math.max(2, Math.ceil(Math.max(ns.length, nw.length) * 0.45));
+        if (levenshtein(ns, nw) <= tol) return true;
         return false;
       });
     }
@@ -861,10 +903,25 @@
       animating = true;
       if (isListening) recognition.stop();
       const card = document.getElementById('exerciseCard');
+      const wordEl = document.getElementById('cardWord');
+      const entry = exerciseWords[currentIndex];
+
+      // Quick flip to reveal the dialect word, hold briefly, then slide away
+      card.style.transition = 'transform 0.2s ease-in-out';
+      card.style.transform = 'rotateY(90deg)';
+      setTimeout(function () {
+        if (entry) wordEl.textContent = entry.baseldeutsch[0];
+        card.style.transform = 'rotateY(0deg)';
+      }, 200);
+      setTimeout(function () { slideAway(card, direction); }, 1000);
+    }
+
+    function slideAway(card, direction) {
       // Little wind-up hop, then slide off in the answer direction
       card.style.setProperty('--dir', direction === 'right' ? '160%' : '-160%');
       card.style.setProperty('--rot', direction === 'right' ? '12deg' : '-12deg');
       card.style.transition = 'none';
+      card.style.transform = '';
       card.classList.add('slide-out');
       setTimeout(function () {
         currentIndex++;
@@ -926,7 +983,13 @@
       document.getElementById('cardWord').textContent = entry.german;
       document.getElementById('progressText').textContent =
         (currentIndex + 1) + ' / ' + exerciseWords.length;
-      document.getElementById('spokenFeedback').textContent = '';
+      // First-ever exercise card: explain how to answer (shown once)
+      if (currentIndex === 0 && !localStorage.getItem('ubenHintSeen')) {
+        document.getElementById('spokenFeedback').textContent = 'Drücke auf die Aufnahmetaste und sprich es aus';
+        localStorage.setItem('ubenHintSeen', '1');
+      } else {
+        document.getElementById('spokenFeedback').textContent = '';
+      }
       // Show stacked cards only when more cards remain (none on the last card)
       const rem = exerciseWords.length - currentIndex;
       document.getElementById('cardShadow1').style.visibility = rem > 1 ? 'visible' : 'hidden';
