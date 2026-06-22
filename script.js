@@ -45,7 +45,10 @@ function buildVoiceBars(btn, n) {
   btn.appendChild(wrap);
 }
 
-function startVoiceViz(btn) {
+// Pass noMic = true on screens that use SpeechRecognition: opening a second
+// getUserMedia stream here competes with the recogniser for the microphone and
+// makes repeat recordings fail. With noMic the bars just shimmer (no mic grab).
+function startVoiceViz(btn, noMic) {
   btn.classList.add('active');
   var bars = btn.querySelectorAll('.bars span');
   var analyser = null;
@@ -70,7 +73,7 @@ function startVoiceViz(btn) {
     _viz.raf = requestAnimationFrame(frame);
   }
 
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  if (!noMic && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
       _viz.stream = stream;
       var AC = window.AudioContext || window.webkitAudioContext;

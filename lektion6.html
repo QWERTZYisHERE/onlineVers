@@ -383,7 +383,7 @@
     function setListening(val) {
       isListening = val;
       const btn = document.getElementById('micBtn');
-      if (val) startVoiceViz(btn);
+      if (val) startVoiceViz(btn, true);   // noMic: don't fight SpeechRecognition for the mic
       else stopVoiceViz(btn);
     }
 
