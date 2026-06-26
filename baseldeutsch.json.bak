@@ -840,6 +840,13 @@
     ]
   },
   {
+    "german": "Aal",
+    "baseldeutsch": [
+      "Aal",
+      "Ool"
+    ]
+  },
+  {
     "german": "Aargau",
     "baseldeutsch": [
       "Riebliland"
@@ -1007,6 +1014,12 @@
     "german": "Charlotte",
     "baseldeutsch": [
       "Lotti"
+    ]
+  },
+  {
+    "german": "da",
+    "baseldeutsch": [
+      "doo"
     ]
   },
   {
@@ -2464,6 +2477,13 @@
     ]
   },
   {
+    "german": "Axt",
+    "baseldeutsch": [
+      "Ax",
+      "Axt"
+    ]
+  },
+  {
     "german": "Barbara",
     "baseldeutsch": [
       "Bääbeli",
@@ -2969,6 +2989,12 @@
     ]
   },
   {
+    "german": "Anno",
+    "baseldeutsch": [
+      "Ane"
+    ]
+  },
+  {
     "german": "anpassen",
     "baseldeutsch": [
       "aabasse"
@@ -3418,6 +3444,12 @@
     "german": "darüber",
     "baseldeutsch": [
       "driiber"
+    ]
+  },
+  {
+    "german": "das",
+    "baseldeutsch": [
+      "s"
     ]
   },
   {
@@ -4233,6 +4265,14 @@
     ]
   },
   {
+    "german": "die",
+    "baseldeutsch": [
+      "d",
+      "di",
+      "die"
+    ]
+  },
+  {
     "german": "Dieb",
     "baseldeutsch": [
       "Stääldieb"
@@ -4634,6 +4674,12 @@
     ]
   },
   {
+    "german": "der",
+    "baseldeutsch": [
+      "der"
+    ]
+  },
+  {
     "german": "acht",
     "baseldeutsch": [
       "acht"
@@ -4656,6 +4702,12 @@
     "german": "Bürgermeister",
     "baseldeutsch": [
       "Burgemaischter"
+    ]
+  },
+  {
+    "german": "den (Dat. Plur.)",
+    "baseldeutsch": [
+      "de"
     ]
   },
   {
@@ -5596,10 +5648,23 @@
     ]
   },
   {
+    "german": "diese",
+    "baseldeutsch": [
+      "die"
+    ]
+  },
+  {
     "german": "diesen (Dat. Plur.)",
     "baseldeutsch": [
       "dääne",
       "däne"
+    ]
+  },
+  {
+    "german": "dieser (Nom. m.)",
+    "baseldeutsch": [
+      "dää",
+      "dä"
     ]
   },
   {
@@ -5683,6 +5748,13 @@
     "baseldeutsch": [
       "Batallioonsglunggi",
       "Staatsgrippel"
+    ]
+  },
+  {
+    "german": "dich",
+    "baseldeutsch": [
+      "dii",
+      "di"
     ]
   },
   {
@@ -6162,6 +6234,19 @@
     "german": "bürgerlich",
     "baseldeutsch": [
       "buurgerlig"
+    ]
+  },
+  {
+    "german": "dem",
+    "baseldeutsch": [
+      "em"
+    ]
+  },
+  {
+    "german": "dein",
+    "baseldeutsch": [
+      "dyy",
+      "dy"
     ]
   },
   {
@@ -7058,6 +7143,13 @@
     ]
   },
   {
+    "german": "bei",
+    "baseldeutsch": [
+      "bi",
+      "byy"
+    ]
+  },
+  {
     "german": "bimmeln",
     "baseldeutsch": [
       "bimpele"
@@ -7433,6 +7525,12 @@
     ]
   },
   {
+    "german": "all",
+    "baseldeutsch": [
+      "all"
+    ]
+  },
+  {
     "german": "atmen",
     "baseldeutsch": [
       "ootme",
@@ -7735,6 +7833,12 @@
     "german": "Binningen",
     "baseldeutsch": [
       "Binnige"
+    ]
+  },
+  {
+    "german": "bis",
+    "baseldeutsch": [
+      "bis"
     ]
   },
   {
@@ -8984,6 +9088,13 @@
     ]
   },
   {
+    "german": "an",
+    "baseldeutsch": [
+      "aa",
+      "an"
+    ]
+  },
+  {
     "german": "anschwellen",
     "baseldeutsch": [
       "gschwälle",
@@ -9204,6 +9315,12 @@
     ]
   },
   {
+    "german": "ach wo",
+    "baseldeutsch": [
+      "äch"
+    ]
+  },
+  {
     "german": "Achterbahn",
     "baseldeutsch": [
       "Achtibaan"
@@ -9322,6 +9439,13 @@
     "german": "Absatz",
     "baseldeutsch": [
       "Absatz"
+    ]
+  },
+  {
+    "german": "aus",
+    "baseldeutsch": [
+      "uus",
+      "us"
     ]
   },
   {
@@ -9662,6 +9786,12 @@
     ]
   },
   {
+    "german": "Affe",
+    "baseldeutsch": [
+      "Aff"
+    ]
+  },
+  {
     "german": "angesehen",
     "baseldeutsch": [
       "aagsääche"
@@ -9758,6 +9888,18 @@
     ]
   },
   {
+    "german": "auch",
+    "baseldeutsch": [
+      "au"
+    ]
+  },
+  {
+    "german": "ach was",
+    "baseldeutsch": [
+      "aba"
+    ]
+  },
+  {
     "german": "Beule",
     "baseldeutsch": [
       "Byyle",
@@ -9798,6 +9940,14 @@
     "german": "Ärmel",
     "baseldeutsch": [
       "Eermel"
+    ]
+  },
+  {
+    "german": "als",
+    "baseldeutsch": [
+      "als",
+      "as",
+      "wo"
     ]
   },
   {
@@ -9962,6 +10112,12 @@
     "german": "Baslerwein",
     "baseldeutsch": [
       "Baaselwyy"
+    ]
+  },
+  {
+    "german": "ah",
+    "baseldeutsch": [
+      "aa"
     ]
   },
   {
@@ -10318,6 +10474,12 @@
       "nunnig",
       "schatzig",
       "syydig"
+    ]
+  },
+  {
+    "german": "auf",
+    "baseldeutsch": [
+      "uff"
     ]
   },
   {
@@ -11032,7 +11194,22 @@
       "bleie"
     ]
   },
-  {
+
+    {
+    "german": "Zeit",
+    "baseldeutsch": [
+      "Zyt"
+    ]
+  },
+
+    {
+    "german": "Rhein",
+    "baseldeutsch": [
+      "Ryy"
+    ]
+  },
+
+    {
     "german": "Fasnacht",
     "baseldeutsch": [
       "drey scheenste Dääg"

@@ -396,10 +396,11 @@
   </div>
   <div class="control-label">Kategorie</div>
   <div class="filter-row">
-    <button class="filter-btn" onclick="setFilter('az', this)">A–Z</button>
-    <button class="filter-btn" onclick="setFilter('kochen', this)">Kochen</button>
+    <button class="filter-btn active" onclick="setFilter('az', this)">A–Z</button>
     <button class="filter-btn" onclick="setFilter('orte', this)">Orte</button>
+    <button class="filter-btn" onclick="setFilter('events', this)">Events</button>
     <button class="filter-btn" onclick="setFilter('tiere', this)">Tiere</button>
+    <button class="filter-btn" onclick="setFilter('kochen', this)">Kochen</button> 
   </div>
 
 
@@ -520,7 +521,7 @@
   <script src="script.js"></script>
   <script>
     let allEntries = [];
-    let activeFilter = null;
+    let activeFilter = 'az';   // category switch always has one option active; A–Z by default
     let displayMode = 'hochdeutsch';
 
     function setDisplay(mode, btn) {
@@ -565,6 +566,8 @@
       'Bewohner von Riehen', 'Colmar', 'Delsberg', 'Rhein'
     ]);
 
+    const EVENTS = new Set(['Clique', 'Besuchslaterne']);
+
     function esc(text) {
       return text
         .replace(/&/g, '&amp;')
@@ -573,14 +576,10 @@
     }
 
     function setFilter(filter, btn) {
-      if (activeFilter === filter) {
-        activeFilter = null;
-        btn.classList.remove('active');
-      } else {
-        activeFilter = filter;
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      }
+      // Switch behaviour: one category is always active (no toggling off)
+      activeFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       applyFilters();
     }
 
@@ -589,6 +588,12 @@
       if (activeFilter === 'kochen') return KOCHEN.has(entry.german);
       if (activeFilter === 'orte') return ORTE.has(entry.german) || entry.german.startsWith('Bewohner');
       if (activeFilter === 'tiere') return TIERE.has(entry.german);
+      if (activeFilter === 'events') {
+        return EVENTS.has(entry.german)
+          || entry.german.startsWith('Fasnacht')
+          || entry.german.startsWith('Blasmusik')
+          || entry.german.indexOf('Trommel') !== -1;
+      }
       return false;
     }
 

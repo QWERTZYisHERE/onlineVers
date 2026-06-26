@@ -727,6 +727,8 @@
       document.getElementById('typeControls').style.display = 'flex';
     }
 
+    let recogTimer = null;   // safety auto-stop, in case end-of-speech is never detected
+
     function buildRecognition() {
       const rec = new SpeechRecognitionAPI();
       rec.lang = 'de-DE';   // standard German — de-CH has no model on iOS Safari
@@ -735,6 +737,7 @@
       rec.maxAlternatives = 5;
 
       rec.onresult = function (e) {
+        clearTimeout(recogTimer);
         // Pick the alternative that best matches the expected word, else the first
         const guesses = [];
         for (let i = 0; i < e.results[0].length; i++) guesses.push(e.results[0][i].transcript.trim());
@@ -744,6 +747,7 @@
         checkAnswer(spoken);
       };
       rec.onerror = function (e) {
+        clearTimeout(recogTimer);
         setListening(false);
         const fb = document.getElementById('spokenFeedback');
         if (e.error === 'aborted') return;   // user stopped / restarted — stay quiet
@@ -757,7 +761,7 @@
           fb.textContent = 'Spracherkennig het nid klappt – nomol versueche';
         }
       };
-      rec.onend = function () { setListening(false); };
+      rec.onend = function () { clearTimeout(recogTimer); setListening(false); };
       return rec;
     }
 
@@ -794,6 +798,7 @@
         return;
       }
       if (isListening) {
+        clearTimeout(recogTimer);
         try { recognition.stop(); } catch (_) {}
         return;
       }
@@ -804,6 +809,11 @@
       try {
         recognition.start();
         fb.textContent = 'Uufnahme…';
+        // If the engine never detects the end of speech, force it to finalise
+        clearTimeout(recogTimer);
+        recogTimer = setTimeout(function () {
+          try { recognition.stop(); } catch (_) {}
+        }, 4000);
       } catch (e) {
         setListening(false);
         fb.textContent = 'Het nid gstartet – nomol versueche';
